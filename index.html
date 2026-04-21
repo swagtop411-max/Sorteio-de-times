@@ -2,36 +2,44 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Sorteio de Times de Vôlei</title>
+  <title>Sorteio Vôlei M&M</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<h1>🏐 Sorteio de Times</h1>
+<div class="container">
 
-<input type="text" id="nome" placeholder="Nome do jogador">
-<select id="genero">
-  <option value="M">Masculino</option>
-  <option value="F">Feminino</option>
-</select>
+  <h1>🏐 Sorteio de Times</h1>
 
-<select id="nivel">
-  <option value="1">Nível 1</option>
-  <option value="2">Nível 2</option>
-  <option value="3">Nível 3</option>
-  <option value="4">Nível 4</option>
-  <option value="5">Nível 5</option>
-</select>
+  <div class="card">
+    <input type="text" id="nome" placeholder="Nome do jogador">
 
-<button onclick="adicionarJogador()">Adicionar</button>
+    <select id="genero">
+      <option value="M">👨 Masculino</option>
+      <option value="F">👩 Feminino</option>
+    </select>
 
-<h2>Jogadores</h2>
-<ul id="lista"></ul>
+    <select id="nivel">
+      <option value="1">Nível 1</option>
+      <option value="2">Nível 2</option>
+      <option value="3">Nível 3</option>
+      <option value="4">Nível 4</option>
+      <option value="5">Nível 5</option>
+    </select>
 
-<button onclick="sortearTimes()">Sortear Times</button>
+    <button onclick="adicionarJogador()">+ Adicionar</button>
+  </div>
 
-<h2>Times</h2>
-<div id="times"></div>
+  <div class="card">
+    <h2>👥 Jogadores</h2>
+    <ul id="lista"></ul>
+  </div>
+
+  <button class="sortear" onclick="sortearTimes()">🎯 Sortear Times</button>
+
+  <div id="times"></div>
+
+</div>
 
 <script src="script.js"></script>
 </body>
