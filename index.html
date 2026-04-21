@@ -2,15 +2,99 @@
 <html lang="pt-br">
 <head>
   <meta charset="UTF-8">
-  <title>Sorteio Vôlei M&M</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Sorteio de Times - Vôlei</title>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial;
+      background: linear-gradient(135deg, #0f172a, #1e293b);
+      color: white;
+    }
+
+    .container {
+      max-width: 900px;
+      margin: auto;
+      padding: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      margin-bottom: 20px;
+    }
+
+    .card {
+      background: #1e293b;
+      padding: 15px;
+      border-radius: 12px;
+      margin-bottom: 15px;
+    }
+
+    input, select, button {
+      margin: 5px;
+      padding: 10px;
+      border-radius: 8px;
+      border: none;
+    }
+
+    input, select {
+      width: 200px;
+    }
+
+    button {
+      cursor: pointer;
+      background: #22c55e;
+      color: white;
+      font-weight: bold;
+    }
+
+    button:hover {
+      background: #16a34a;
+    }
+
+    .sortear {
+      margin: 20px;
+      font-size: 18px;
+      padding: 12px 20px;
+    }
+
+    #times {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+    }
+
+    .time {
+      background: #334155;
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    li {
+      margin: 5px 0;
+    }
+
+    li button {
+      margin-left: 10px;
+      background: #ef4444;
+      color: white;
+      border-radius: 6px;
+      padding: 4px 8px;
+    }
+
+    li button:hover {
+      background: #dc2626;
+    }
+  </style>
 </head>
+
 <body>
 
 <div class="container">
 
   <h1>🏐 Sorteio de Times</h1>
 
+  <!-- Cadastro -->
   <div class="card">
     <input type="text" id="nome" placeholder="Nome do jogador">
 
@@ -27,20 +111,140 @@
       <option value="5">Nível 5</option>
     </select>
 
+    <br>
     <button onclick="adicionarJogador()">+ Adicionar</button>
   </div>
 
+  <!-- Lista -->
   <div class="card">
     <h2>👥 Jogadores</h2>
     <ul id="lista"></ul>
   </div>
 
+  <!-- Botão -->
   <button class="sortear" onclick="sortearTimes()">🎯 Sortear Times</button>
 
+  <!-- Times -->
   <div id="times"></div>
 
 </div>
 
-<script src="script.js"></script>
+<script>
+let jogadores = [];
+
+// ADICIONAR JOGADOR
+function adicionarJogador() {
+  const nomeInput = document.getElementById("nome");
+  const genero = document.getElementById("genero").value;
+  const nivel = parseInt(document.getElementById("nivel").value);
+
+  const nome = nomeInput.value.trim();
+
+  if (!nome) {
+    alert("Digite o nome do jogador!");
+    return;
+  }
+
+  jogadores.push({ nome, genero, nivel });
+
+  atualizarLista();
+
+  // 🔥 LIMPAR CAMPOS AUTOMATICAMENTE
+  nomeInput.value = "";
+  document.getElementById("genero").value = "M";
+  document.getElementById("nivel").value = "1";
+
+  nomeInput.focus(); // já deixa pronto pro próximo
+}
+
+// LISTA
+function atualizarLista() {
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
+
+  jogadores.forEach((j, index) => {
+    const li = document.createElement("li");
+
+    li.innerHTML = `
+      ${j.nome} - ${j.genero} - Nível ${j.nivel}
+      <button onclick="removerJogador(${index})">❌</button>
+    `;
+
+    lista.appendChild(li);
+  });
+}
+
+// REMOVER
+function removerJogador(index) {
+  jogadores.splice(index, 1);
+  atualizarLista();
+}
+
+// EMBARALHAR
+function embaralhar(array) {
+  return array.sort(() => Math.random() - 0.5);
+}
+
+// SORTEAR TIMES
+function sortearTimes() {
+  let homens = jogadores.filter(j => j.genero === "M");
+  let mulheres = jogadores.filter(j => j.genero === "F");
+
+  if (homens.length < 2 || mulheres.length < 2) {
+    alert("Precisa de pelo menos 2 homens e 2 mulheres!");
+    return;
+  }
+
+  homens = embaralhar(homens);
+  mulheres = embaralhar(mulheres);
+
+  const totalTimes = Math.floor(Math.min(homens.length / 2, mulheres.length / 2));
+  let times = [];
+
+  for (let i = 0; i < totalTimes; i++) {
+    times.push([]);
+  }
+
+  homens.sort((a, b) => b.nivel - a.nivel);
+  mulheres.sort((a, b) => b.nivel - a.nivel);
+
+  homens.forEach((j, i) => {
+    times[i % totalTimes].push(j);
+  });
+
+  mulheres.forEach((j, i) => {
+    times[i % totalTimes].push(j);
+  });
+
+  times = times.map(time => {
+    let h = time.filter(j => j.genero === "M").slice(0, 2);
+    let m = time.filter(j => j.genero === "F").slice(0, 2);
+    return [...h, ...m];
+  });
+
+  mostrarTimes(times);
+}
+
+// MOSTRAR TIMES
+function mostrarTimes(times) {
+  const div = document.getElementById("times");
+  div.innerHTML = "";
+
+  times.forEach((time, i) => {
+    let html = `<div class="time"><h3>Time ${i + 1}</h3>`;
+
+    time.forEach(j => {
+      html += `<p>${j.nome} (N${j.nivel})</p>`;
+    });
+
+    const media = time.reduce((acc, j) => acc + j.nivel, 0);
+
+    html += `<strong>Média: ${media}</strong></div>`;
+
+    div.innerHTML += html;
+  });
+}
+</script>
+
 </body>
 </html>
