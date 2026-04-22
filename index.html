@@ -1,138 +1,148 @@
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-  <meta charset="UTF-8">
-  <title>Sorteio de Times - Vôlei</title>
+<meta charset="UTF-8">
+<title>Sorteio de Times - M&M Vôlei</title>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: Arial;
-      background: linear-gradient(135deg, #0f172a, #1e293b);
-      color: white;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: Arial;
+  background: linear-gradient(135deg, #020617, #0f172a);
+  color: white;
+}
 
-    .container {
-      max-width: 900px;
-      margin: auto;
-      padding: 20px;
-      text-align: center;
-    }
+.container {
+  max-width: 900px;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
 
-    h1 {
-      margin-bottom: 20px;
-    }
+h1 {
+  color: #22c55e;
+}
 
-    .card {
-      background: #1e293b;
-      padding: 15px;
-      border-radius: 12px;
-      margin-bottom: 15px;
-    }
+.card {
+  background: #1e293b;
+  border: 2px solid #22c55e;
+  padding: 15px;
+  border-radius: 12px;
+  margin-bottom: 15px;
+}
 
-    input, select, button {
-      margin: 5px;
-      padding: 10px;
-      border-radius: 8px;
-      border: none;
-    }
+input, select, button {
+  margin: 5px;
+  padding: 10px;
+  border-radius: 8px;
+  border: none;
+}
 
-    input, select {
-      width: 200px;
-    }
+button {
+  cursor: pointer;
+  background: #22c55e;
+  color: white;
+  font-weight: bold;
+}
 
-    button {
-      cursor: pointer;
-      background: #22c55e;
-      color: white;
-      font-weight: bold;
-    }
+button:hover {
+  background: #16a34a;
+}
 
-    button:hover {
-      background: #16a34a;
-    }
+.sortear {
+  margin: 20px;
+  font-size: 18px;
+  padding: 12px 20px;
+  background: #eab308;
+  color: black;
+}
 
-    .sortear {
-      margin: 20px;
-      font-size: 18px;
-      padding: 12px 20px;
-    }
+#times {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+}
 
-    #times {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-      gap: 15px;
-    }
+.time {
+  background: #334155;
+  padding: 10px;
+  border-radius: 10px;
+  border-left: 5px solid #22c55e;
+}
 
-    .time {
-      background: #334155;
-      padding: 10px;
-      border-radius: 10px;
-    }
+li {
+  margin: 5px 0;
+}
 
-    li {
-      margin: 5px 0;
-    }
+li button {
+  margin-left: 10px;
+  background: #ef4444;
+  color: white;
+  border-radius: 6px;
+  padding: 4px 8px;
+}
 
-    li button {
-      margin-left: 10px;
-      background: #ef4444;
-      color: white;
-      border-radius: 6px;
-      padding: 4px 8px;
-    }
+li button:hover {
+  background: #dc2626;
+}
+</style>
 
-    li button:hover {
-      background: #dc2626;
-    }
-  </style>
 </head>
-
 <body>
 
 <div class="container">
 
-  <h1>🏐 Sorteio de Times</h1>
+<h1>🏐 Sorteio de Times M&M</h1>
 
-  <!-- Cadastro -->
-  <div class="card">
-    <input type="text" id="nome" placeholder="Nome do jogador">
+<div class="card">
+  <input type="text" id="nome" placeholder="Nome do jogador">
 
-    <select id="genero">
-      <option value="M">👨 Masculino</option>
-      <option value="F">👩 Feminino</option>
-    </select>
+  <select id="genero">
+    <option value="M">👨 Masculino</option>
+    <option value="F">👩 Feminino</option>
+  </select>
 
-    <select id="nivel">
-      <option value="1">Nível 1</option>
-      <option value="2">Nível 2</option>
-      <option value="3">Nível 3</option>
-      <option value="4">Nível 4</option>
-      <option value="5">Nível 5</option>
-    </select>
+  <select id="nivel">
+    <option value="1">Nível 1</option>
+    <option value="2">Nível 2</option>
+    <option value="3">Nível 3</option>
+    <option value="4">Nível 4</option>
+    <option value="5">Nível 5</option>
+  </select>
 
-    <br>
-    <button onclick="adicionarJogador()">+ Adicionar</button>
-  </div>
+  <br>
+  <button onclick="adicionarJogador()">+ Adicionar</button>
+</div>
 
-  <!-- Lista -->
-  <div class="card">
-    <h2>👥 Jogadores</h2>
-    <ul id="lista"></ul>
-  </div>
+<div class="card">
+  <h2>👥 Jogadores</h2>
+  <ul id="lista"></ul>
+</div>
 
-  <!-- Botão -->
-  <button class="sortear" onclick="sortearTimes()">🎯 Sortear Times</button>
+<button class="sortear" onclick="sortearTimes()">🎯 Sortear Times</button>
 
-  <!-- Times -->
-  <div id="times"></div>
+<div id="times"></div>
 
 </div>
 
 <script>
 let jogadores = [];
 
-// ADICIONAR JOGADOR
+// SALVAR
+function salvarJogadores() {
+  localStorage.setItem("jogadores", JSON.stringify(jogadores));
+}
+
+// CARREGAR
+function carregarJogadores() {
+  const dados = localStorage.getItem("jogadores");
+  if (dados) {
+    jogadores = JSON.parse(dados);
+    atualizarLista();
+  }
+}
+
+// ADICIONAR
 function adicionarJogador() {
   const nomeInput = document.getElementById("nome");
   const genero = document.getElementById("genero").value;
@@ -141,20 +151,20 @@ function adicionarJogador() {
   const nome = nomeInput.value.trim();
 
   if (!nome) {
-    alert("Digite o nome do jogador!");
+    alert("Digite o nome!");
     return;
   }
 
   jogadores.push({ nome, genero, nivel });
 
   atualizarLista();
+  salvarJogadores();
 
-  // 🔥 LIMPAR CAMPOS AUTOMATICAMENTE
+  // limpar campos
   nomeInput.value = "";
   document.getElementById("genero").value = "M";
   document.getElementById("nivel").value = "1";
-
-  nomeInput.focus(); // já deixa pronto pro próximo
+  nomeInput.focus();
 }
 
 // LISTA
@@ -178,6 +188,7 @@ function atualizarLista() {
 function removerJogador(index) {
   jogadores.splice(index, 1);
   atualizarLista();
+  salvarJogadores();
 }
 
 // EMBARALHAR
@@ -185,7 +196,7 @@ function embaralhar(array) {
   return array.sort(() => Math.random() - 0.5);
 }
 
-// SORTEAR TIMES
+// ALGORITMO PROFISSIONAL
 function sortearTimes() {
   let homens = jogadores.filter(j => j.genero === "M");
   let mulheres = jogadores.filter(j => j.genero === "F");
@@ -195,37 +206,41 @@ function sortearTimes() {
     return;
   }
 
-  homens = embaralhar(homens);
-  mulheres = embaralhar(mulheres);
-
   const totalTimes = Math.floor(Math.min(homens.length / 2, mulheres.length / 2));
-  let times = [];
-
-  for (let i = 0; i < totalTimes; i++) {
-    times.push([]);
-  }
 
   homens.sort((a, b) => b.nivel - a.nivel);
   mulheres.sort((a, b) => b.nivel - a.nivel);
 
-  homens.forEach((j, i) => {
-    times[i % totalTimes].push(j);
-  });
+  let melhoresTimes = null;
+  let menorDiferenca = Infinity;
 
-  mulheres.forEach((j, i) => {
-    times[i % totalTimes].push(j);
-  });
+  for (let tentativa = 0; tentativa < 300; tentativa++) {
 
-  times = times.map(time => {
-    let h = time.filter(j => j.genero === "M").slice(0, 2);
-    let m = time.filter(j => j.genero === "F").slice(0, 2);
-    return [...h, ...m];
-  });
+    let h = [...homens].sort(() => Math.random() - 0.5);
+    let m = [...mulheres].sort(() => Math.random() - 0.5);
 
-  mostrarTimes(times);
+    let times = Array.from({ length: totalTimes }, () => []);
+
+    for (let i = 0; i < totalTimes; i++) {
+      times[i].push(h.pop(), h.pop(), m.pop(), m.pop());
+    }
+
+    let medias = times.map(t => t.reduce((acc, j) => acc + j.nivel, 0));
+    let max = Math.max(...medias);
+    let min = Math.min(...medias);
+
+    let diferenca = max - min;
+
+    if (diferenca < menorDiferenca) {
+      menorDiferenca = diferenca;
+      melhoresTimes = times;
+    }
+  }
+
+  mostrarTimes(melhoresTimes);
 }
 
-// MOSTRAR TIMES
+// MOSTRAR
 function mostrarTimes(times) {
   const div = document.getElementById("times");
   div.innerHTML = "";
@@ -244,6 +259,9 @@ function mostrarTimes(times) {
     div.innerHTML += html;
   });
 }
+
+// INICIAR
+carregarJogadores();
 </script>
 
 </body>
