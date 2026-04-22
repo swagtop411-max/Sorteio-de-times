@@ -9,23 +9,30 @@ body {
   margin: 0;
   font-family: Arial;
   color: white;
+  overflow-x: hidden;
 }
 
-/* 🌅 FUNDO ESTILO PRAIA */
-body::before {
-  content: "";
+/* 🌊 FUNDO AREIA */
+body {
+  background: radial-gradient(circle at bottom, #f59e0b 0%, #78350f 100%);
+}
+
+/* 🖼️ IMAGENS LATERAIS */
+.lateral {
   position: fixed;
-  inset: 0;
-
-  background:
-    linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.8)),
-    url("MeM.jpg");
-
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-
+  top: 0;
+  height: 100%;
+  width: auto;
+  opacity: 0.25;
   z-index: -1;
+}
+
+.lateral.left {
+  left: 0;
+}
+
+.lateral.right {
+  right: 0;
 }
 
 /* container */
@@ -40,23 +47,27 @@ body::before {
 .logo {
   font-size: 34px;
   font-weight: bold;
-  color: #facc15;
-  text-shadow: 0 0 10px rgba(255,200,0,0.6);
+  color: #fde047;
 }
 
-.subtitulo {
-  margin-bottom: 20px;
-  color: #fde68a;
+/* 🏐 BOLA QUICANDO */
+.bola {
+  font-size: 40px;
+  animation: quicar 1s infinite ease-in-out;
 }
 
-/* 🏐 CARDS ESTILO AREIA */
+@keyframes quicar {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-20px); }
+}
+
+/* cards */
 .card {
-  background: rgba(255, 183, 77, 0.15);
+  background: rgba(0,0,0,0.6);
   border: 2px solid #facc15;
   padding: 15px;
   border-radius: 16px;
   margin-bottom: 15px;
-  backdrop-filter: blur(6px);
 }
 
 /* inputs */
@@ -71,33 +82,24 @@ input, select {
   width: 200px;
 }
 
-/* 🔥 BOTÕES */
+/* botões */
 button {
   cursor: pointer;
   font-weight: bold;
   transition: 0.3s;
 }
 
-/* adicionar */
-button {
-  background: linear-gradient(45deg, #22c55e, #4ade80);
-  color: white;
-}
-
 button:hover {
   transform: scale(1.05);
 }
 
-/* sortear */
 .sortear {
-  background: linear-gradient(45deg, #f59e0b, #facc15);
+  background: #facc15;
   color: black;
-  font-size: 18px;
 }
 
-/* reset */
 .reset {
-  background: linear-gradient(45deg, #ef4444, #f87171);
+  background: #ef4444;
 }
 
 /* times */
@@ -107,46 +109,53 @@ button:hover {
   gap: 15px;
 }
 
-/* 🏐 CARD TIME */
+/* 🎬 ANIMAÇÃO DOS TIMES */
 .time {
-  background: rgba(0, 0, 0, 0.6);
+  background: rgba(0,0,0,0.7);
   border: 2px solid #facc15;
   padding: 10px;
   border-radius: 12px;
+  animation: aparecer 0.5s ease;
 }
 
-.time h3 {
-  color: #facc15;
-}
-
-/* lista */
-li {
-  margin: 5px 0;
-}
-
-li button {
-  margin-left: 10px;
-  background: #ef4444;
-  border-radius: 6px;
-}
-
-/* responsivo */
-@media (max-width: 600px) {
-  input, select {
-    width: 90%;
+@keyframes aparecer {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
   }
 }
+
+/* 🏆 ranking */
+.ranking {
+  margin-top: 20px;
+  background: rgba(0,0,0,0.7);
+  padding: 10px;
+  border-radius: 10px;
+  border: 2px solid gold;
+}
+
+.ranking h3 {
+  color: gold;
+}
+
 </style>
 </head>
 
 <body>
 
+<!-- 🖼️ laterais -->
+<img src="MeM.jpg" class="lateral left">
+<img src="MeM.jpg" class="lateral right">
+
 <div class="container">
 
 <div class="logo">🏐 BEACH VÔLEI M&M</div>
-<div class="subtitulo">Sorteio de Times na Areia</div>
+<div class="bola">🏐</div>
 
-<!-- cadastro -->
 <div class="card">
   <input type="text" id="nome" placeholder="Nome do jogador">
 
@@ -167,16 +176,17 @@ li button {
   <button onclick="adicionarJogador()">+ Adicionar</button>
 </div>
 
-<!-- lista -->
 <div class="card">
   <h2>👥 Jogadores</h2>
   <ul id="lista"></ul>
 </div>
 
-<button class="sortear" onclick="sortearTimes()">🎯 Sortear Times</button>
+<button class="sortear" onclick="sortearTimes()">🎯 Sortear</button>
 <button class="reset" onclick="resetarTimes()">🔄 Resetar</button>
 
 <div id="times"></div>
+
+<div id="ranking" class="ranking"></div>
 
 </div>
 
@@ -196,11 +206,10 @@ function carregarJogadores() {
 }
 
 function adicionarJogador() {
-  const nomeInput = document.getElementById("nome");
+  const nome = document.getElementById("nome").value.trim();
   const genero = document.getElementById("genero").value;
   const nivel = parseInt(document.getElementById("nivel").value);
 
-  const nome = nomeInput.value.trim();
   if (!nome) return alert("Digite o nome!");
 
   jogadores.push({ nome, genero, nivel });
@@ -208,82 +217,90 @@ function adicionarJogador() {
   atualizarLista();
   salvarJogadores();
 
-  nomeInput.value = "";
-  nomeInput.focus();
+  document.getElementById("nome").value = "";
 }
 
 function atualizarLista() {
   const lista = document.getElementById("lista");
   lista.innerHTML = "";
 
-  jogadores.forEach((j, i) => {
+  jogadores.forEach((j,i)=>{
     const li = document.createElement("li");
-    li.innerHTML = `
-      ${j.nome} - ${j.genero} - Nível ${j.nivel}
-      <button onclick="removerJogador(${i})">❌</button>
-    `;
+    li.innerHTML = `${j.nome} (N${j.nivel}) 
+    <button onclick="removerJogador(${i})">❌</button>`;
     lista.appendChild(li);
   });
 }
 
 function removerJogador(i) {
-  jogadores.splice(i, 1);
+  jogadores.splice(i,1);
   atualizarLista();
   salvarJogadores();
 }
 
 function resetarTimes() {
   document.getElementById("times").innerHTML = "";
+  document.getElementById("ranking").innerHTML = "";
 }
 
 /* sorteio com sobra */
 function sortearTimes() {
-  let homens = jogadores.filter(j => j.genero === "M");
-  let mulheres = jogadores.filter(j => j.genero === "F");
+  let homens = jogadores.filter(j=>j.genero==="M");
+  let mulheres = jogadores.filter(j=>j.genero==="F");
 
-  let times = [];
+  let times=[];
 
-  homens.sort(() => Math.random() - 0.5);
-  mulheres.sort(() => Math.random() - 0.5);
+  homens.sort(()=>Math.random()-0.5);
+  mulheres.sort(()=>Math.random()-0.5);
 
-  while (homens.length > 0 || mulheres.length > 0) {
-    let time = [];
+  while(homens.length || mulheres.length){
+    let time=[];
 
-    for (let i = 0; i < 2 && homens.length > 0; i++) {
-      time.push(homens.pop());
-    }
+    for(let i=0;i<2 && homens.length;i++) time.push(homens.pop());
+    for(let i=0;i<2 && mulheres.length;i++) time.push(mulheres.pop());
 
-    for (let i = 0; i < 2 && mulheres.length > 0; i++) {
-      time.push(mulheres.pop());
-    }
-
-    while (time.length < 4 && (homens.length > 0 || mulheres.length > 0)) {
-      if (homens.length > 0) {
-        time.push(homens.pop());
-      } else {
-        time.push(mulheres.pop());
-      }
+    while(time.length<4 && (homens.length || mulheres.length)){
+      if(homens.length) time.push(homens.pop());
+      else time.push(mulheres.pop());
     }
 
     times.push(time);
   }
 
   mostrarTimes(times);
+  gerarRanking(times);
 }
 
-function mostrarTimes(times) {
-  const div = document.getElementById("times");
-  div.innerHTML = "";
+function mostrarTimes(times){
+  const div=document.getElementById("times");
+  div.innerHTML="";
 
   times.forEach((time,i)=>{
-    let html = `<div class="time"><h3>🏐 Time ${i+1}</h3>`;
-
+    let html=`<div class="time"><h3>Time ${i+1}</h3>`;
     time.forEach(j=>{
-      html += `<p>${j.nome} (N${j.nivel})</p>`;
+      html+=`<p>${j.nome} (N${j.nivel})</p>`;
     });
+    html+=`</div>`;
+    div.innerHTML+=html;
+  });
+}
 
-    html += `</div>`;
-    div.innerHTML += html;
+/* 🏆 ranking */
+function gerarRanking(times){
+  let ranking=[];
+
+  times.forEach((time,i)=>{
+    let total = time.reduce((a,j)=>a+j.nivel,0);
+    ranking.push({time:i+1, pontos: total});
+  });
+
+  ranking.sort((a,b)=>b.pontos-a.pontos);
+
+  const div=document.getElementById("ranking");
+  div.innerHTML="<h3>🏆 Ranking</h3>";
+
+  ranking.forEach((r,i)=>{
+    div.innerHTML+=`<p>${i+1}º - Time ${r.time} (${r.pontos})</p>`;
   });
 }
 
