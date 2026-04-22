@@ -11,7 +11,7 @@ body {
   color: white;
 }
 
-/* 🔥 FUNDO COM NOVA IMAGEM */
+/* FUNDO */
 body::before {
   content: "";
   position: fixed;
@@ -23,14 +23,13 @@ body::before {
 
   background-repeat: no-repeat;
   background-position: center;
-  background-size: auto 100%; /* 🔥 mantém imagem inteira */
+  background-size: auto 100%;
 
   background-color: #020617;
 
   z-index: -1;
 }
 
-/* container */
 .container {
   max-width: 900px;
   margin: auto;
@@ -38,7 +37,6 @@ body::before {
   text-align: center;
 }
 
-/* logo */
 .logo {
   font-size: 30px;
   font-weight: bold;
@@ -50,7 +48,6 @@ body::before {
   color: #cbd5f5;
 }
 
-/* cards */
 .card {
   background: rgba(15, 23, 42, 0.85);
   border: 2px solid #22c55e;
@@ -59,7 +56,6 @@ body::before {
   margin-bottom: 15px;
 }
 
-/* inputs */
 input, select, button {
   margin: 5px;
   padding: 10px;
@@ -71,7 +67,6 @@ input, select {
   width: 200px;
 }
 
-/* botões */
 button {
   cursor: pointer;
   background: #22c55e;
@@ -83,16 +78,19 @@ button:hover {
   background: #16a34a;
 }
 
-/* botão sorteio */
 .sortear {
-  margin: 20px;
-  font-size: 18px;
-  padding: 12px 20px;
   background: #eab308;
   color: black;
 }
 
-/* times */
+.reset {
+  background: #ef4444;
+}
+
+.reset:hover {
+  background: #dc2626;
+}
+
 #times {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -106,25 +104,9 @@ button:hover {
   border-left: 5px solid #22c55e;
 }
 
-/* lista */
-li {
-  margin: 5px 0;
-}
-
 li button {
   margin-left: 10px;
   background: #ef4444;
-}
-
-li button:hover {
-  background: #dc2626;
-}
-
-/* responsivo */
-@media (max-width: 600px) {
-  input, select {
-    width: 90%;
-  }
 }
 </style>
 </head>
@@ -136,7 +118,6 @@ li button:hover {
 <div class="logo">🏐 M&M VOLEI</div>
 <div class="subtitulo">Sistema Inteligente de Sorteio</div>
 
-<!-- CADASTRO -->
 <div class="card">
   <input type="text" id="nome" placeholder="Nome do jogador">
 
@@ -157,13 +138,13 @@ li button:hover {
   <button onclick="adicionarJogador()">+ Adicionar</button>
 </div>
 
-<!-- LISTA -->
 <div class="card">
   <h2>👥 Jogadores</h2>
   <ul id="lista"></ul>
 </div>
 
 <button class="sortear" onclick="sortearTimes()">🎯 Sortear Times</button>
+<button class="reset" onclick="resetarTimes()">🔄 Resetar Times</button>
 
 <div id="times"></div>
 
@@ -226,41 +207,49 @@ function removerJogador(i) {
   salvarJogadores();
 }
 
-// algoritmo PRO
+// 🔄 RESETAR TIMES (SEM APAGAR JOGADORES)
+function resetarTimes() {
+  document.getElementById("times").innerHTML = "";
+}
+
+// 🧠 SORTEIO COM SOBRAS
 function sortearTimes() {
   let homens = jogadores.filter(j => j.genero === "M");
   let mulheres = jogadores.filter(j => j.genero === "F");
 
-  if (homens.length < 2 || mulheres.length < 2) {
-    alert("Precisa de 2 homens e 2 mulheres!");
-    return;
-  }
+  let times = [];
 
-  const totalTimes = Math.floor(Math.min(homens.length/2, mulheres.length/2));
+  // embaralhar
+  homens.sort(() => Math.random() - 0.5);
+  mulheres.sort(() => Math.random() - 0.5);
 
-  let melhor = null;
-  let menorDif = Infinity;
+  // enquanto tiver jogadores
+  while (homens.length > 0 || mulheres.length > 0) {
+    let time = [];
 
-  for (let t = 0; t < 300; t++) {
-    let h = [...homens].sort(() => Math.random() - 0.5);
-    let m = [...mulheres].sort(() => Math.random() - 0.5);
-
-    let times = Array.from({length: totalTimes}, () => []);
-
-    for (let i = 0; i < totalTimes; i++) {
-      times[i].push(h.pop(), h.pop(), m.pop(), m.pop());
+    // pega até 2 homens
+    for (let i = 0; i < 2 && homens.length > 0; i++) {
+      time.push(homens.pop());
     }
 
-    let medias = times.map(t => t.reduce((a,j)=>a+j.nivel,0));
-    let dif = Math.max(...medias) - Math.min(...medias);
-
-    if (dif < menorDif) {
-      menorDif = dif;
-      melhor = times;
+    // pega até 2 mulheres
+    for (let i = 0; i < 2 && mulheres.length > 0; i++) {
+      time.push(mulheres.pop());
     }
+
+    // se ainda tiver espaço, completa com quem sobrou
+    while (time.length < 4 && (homens.length > 0 || mulheres.length > 0)) {
+      if (homens.length > 0) {
+        time.push(homens.pop());
+      } else if (mulheres.length > 0) {
+        time.push(mulheres.pop());
+      }
+    }
+
+    times.push(time);
   }
 
-  mostrarTimes(melhor);
+  mostrarTimes(times);
 }
 
 // mostrar
@@ -270,10 +259,12 @@ function mostrarTimes(times) {
 
   times.forEach((time,i)=>{
     let html = `<div class="time"><h3>Time ${i+1}</h3>`;
+
     time.forEach(j=>{
       html += `<p>${j.nome} (N${j.nivel})</p>`;
     });
-    html += `<strong>Média: ${time.reduce((a,j)=>a+j.nivel,0)}</strong></div>`;
+
+    html += `</div>`;
     div.innerHTML += html;
   });
 }
