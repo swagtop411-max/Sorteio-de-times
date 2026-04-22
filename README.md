@@ -1,1 +1,0 @@
-# Sorteio-de-times
