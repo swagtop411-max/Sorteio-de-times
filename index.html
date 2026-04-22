@@ -12,18 +12,20 @@ body {
   overflow-x: hidden;
 }
 
-/* 🌊 FUNDO AREIA */
+/* 🖼️ FUNDO ORIGINAL (SEM ALTERAÇÃO) */
 body {
-  background: radial-gradient(circle at bottom, #f59e0b 0%, #78350f 100%);
+  background-image: url("WhatsApp%20Image%202026-04-21%20at%2021.03.24.jpeg");
+  background-position: center;
+  background-size: cover;
+  background-repeat: no-repeat;
 }
 
-/* 🖼️ IMAGENS LATERAIS */
+/* 🖼️ IMAGENS LATERAIS (SEM ALTERAÇÃO) */
 .lateral {
   position: fixed;
   top: 0;
   height: 100%;
-  width: auto;
-  opacity: 0.25;
+  opacity: 1; /* sem transparência */
   z-index: -1;
 }
 
@@ -47,26 +49,26 @@ body {
 .logo {
   font-size: 34px;
   font-weight: bold;
-  color: #fde047;
+  color: #ffffff;
+  text-shadow: 2px 2px 6px black;
 }
 
-/* 🏐 BOLA QUICANDO */
+/* bola animada */
 .bola {
   font-size: 40px;
   animation: quicar 1s infinite ease-in-out;
 }
 
 @keyframes quicar {
-  0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-20px); }
+  0%,100%{transform:translateY(0);}
+  50%{transform:translateY(-15px);}
 }
 
 /* cards */
 .card {
   background: rgba(0,0,0,0.6);
-  border: 2px solid #facc15;
   padding: 15px;
-  border-radius: 16px;
+  border-radius: 12px;
   margin-bottom: 15px;
 }
 
@@ -74,7 +76,7 @@ body {
 input, select, button {
   margin: 5px;
   padding: 10px;
-  border-radius: 10px;
+  border-radius: 8px;
   border: none;
 }
 
@@ -86,20 +88,16 @@ input, select {
 button {
   cursor: pointer;
   font-weight: bold;
-  transition: 0.3s;
-}
-
-button:hover {
-  transform: scale(1.05);
 }
 
 .sortear {
-  background: #facc15;
+  background: gold;
   color: black;
 }
 
 .reset {
-  background: #ef4444;
+  background: red;
+  color: white;
 }
 
 /* times */
@@ -109,37 +107,25 @@ button:hover {
   gap: 15px;
 }
 
-/* 🎬 ANIMAÇÃO DOS TIMES */
+/* animação */
 .time {
   background: rgba(0,0,0,0.7);
-  border: 2px solid #facc15;
   padding: 10px;
-  border-radius: 12px;
-  animation: aparecer 0.5s ease;
+  border-radius: 10px;
+  animation: aparecer 0.4s ease;
 }
 
 @keyframes aparecer {
-  from {
-    opacity: 0;
-    transform: scale(0.8);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1);
-  }
+  from {opacity:0; transform:scale(0.8);}
+  to {opacity:1; transform:scale(1);}
 }
 
-/* 🏆 ranking */
+/* ranking */
 .ranking {
   margin-top: 20px;
   background: rgba(0,0,0,0.7);
   padding: 10px;
   border-radius: 10px;
-  border: 2px solid gold;
-}
-
-.ranking h3 {
-  color: gold;
 }
 
 </style>
@@ -147,21 +133,21 @@ button:hover {
 
 <body>
 
-<!-- 🖼️ laterais -->
+<!-- laterais -->
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
 
 <div class="container">
 
-<div class="logo">🏐 BEACH VÔLEI M&M</div>
+<div class="logo">🏐 M&M VOLEI</div>
 <div class="bola">🏐</div>
 
 <div class="card">
   <input type="text" id="nome" placeholder="Nome do jogador">
 
   <select id="genero">
-    <option value="M">👨 Masculino</option>
-    <option value="F">👩 Feminino</option>
+    <option value="M">Masculino</option>
+    <option value="F">Feminino</option>
   </select>
 
   <select id="nivel">
@@ -177,76 +163,73 @@ button:hover {
 </div>
 
 <div class="card">
-  <h2>👥 Jogadores</h2>
+  <h2>Jogadores</h2>
   <ul id="lista"></ul>
 </div>
 
-<button class="sortear" onclick="sortearTimes()">🎯 Sortear</button>
-<button class="reset" onclick="resetarTimes()">🔄 Resetar</button>
+<button class="sortear" onclick="sortearTimes()">Sortear</button>
+<button class="reset" onclick="resetarTimes()">Resetar</button>
 
 <div id="times"></div>
-
 <div id="ranking" class="ranking"></div>
 
 </div>
 
 <script>
-let jogadores = [];
+let jogadores=[];
 
-function salvarJogadores() {
-  localStorage.setItem("jogadores", JSON.stringify(jogadores));
+function salvarJogadores(){
+  localStorage.setItem("jogadores",JSON.stringify(jogadores));
 }
 
-function carregarJogadores() {
-  const dados = localStorage.getItem("jogadores");
-  if (dados) {
-    jogadores = JSON.parse(dados);
+function carregarJogadores(){
+  const dados=localStorage.getItem("jogadores");
+  if(dados){
+    jogadores=JSON.parse(dados);
     atualizarLista();
   }
 }
 
-function adicionarJogador() {
-  const nome = document.getElementById("nome").value.trim();
-  const genero = document.getElementById("genero").value;
-  const nivel = parseInt(document.getElementById("nivel").value);
+function adicionarJogador(){
+  const nome=document.getElementById("nome").value.trim();
+  const genero=document.getElementById("genero").value;
+  const nivel=parseInt(document.getElementById("nivel").value);
 
-  if (!nome) return alert("Digite o nome!");
+  if(!nome) return alert("Digite o nome!");
 
-  jogadores.push({ nome, genero, nivel });
-
+  jogadores.push({nome,genero,nivel});
   atualizarLista();
   salvarJogadores();
 
-  document.getElementById("nome").value = "";
+  document.getElementById("nome").value="";
 }
 
-function atualizarLista() {
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
+function atualizarLista(){
+  const lista=document.getElementById("lista");
+  lista.innerHTML="";
 
   jogadores.forEach((j,i)=>{
-    const li = document.createElement("li");
-    li.innerHTML = `${j.nome} (N${j.nivel}) 
+    const li=document.createElement("li");
+    li.innerHTML=`${j.nome} (N${j.nivel}) 
     <button onclick="removerJogador(${i})">❌</button>`;
     lista.appendChild(li);
   });
 }
 
-function removerJogador(i) {
+function removerJogador(i){
   jogadores.splice(i,1);
   atualizarLista();
   salvarJogadores();
 }
 
-function resetarTimes() {
-  document.getElementById("times").innerHTML = "";
-  document.getElementById("ranking").innerHTML = "";
+function resetarTimes(){
+  document.getElementById("times").innerHTML="";
+  document.getElementById("ranking").innerHTML="";
 }
 
-/* sorteio com sobra */
-function sortearTimes() {
-  let homens = jogadores.filter(j=>j.genero==="M");
-  let mulheres = jogadores.filter(j=>j.genero==="F");
+function sortearTimes(){
+  let homens=jogadores.filter(j=>j.genero==="M");
+  let mulheres=jogadores.filter(j=>j.genero==="F");
 
   let times=[];
 
@@ -285,19 +268,18 @@ function mostrarTimes(times){
   });
 }
 
-/* 🏆 ranking */
 function gerarRanking(times){
   let ranking=[];
 
   times.forEach((time,i)=>{
-    let total = time.reduce((a,j)=>a+j.nivel,0);
-    ranking.push({time:i+1, pontos: total});
+    let total=time.reduce((a,j)=>a+j.nivel,0);
+    ranking.push({time:i+1,pontos:total});
   });
 
   ranking.sort((a,b)=>b.pontos-a.pontos);
 
   const div=document.getElementById("ranking");
-  div.innerHTML="<h3>🏆 Ranking</h3>";
+  div.innerHTML="<h3>Ranking</h3>";
 
   ranking.forEach((r,i)=>{
     div.innerHTML+=`<p>${i+1}º - Time ${r.time} (${r.pontos})</p>`;
