@@ -12,30 +12,44 @@ body {
   overflow-x: hidden;
 }
 
-/* 🖼️ FUNDO ORIGINAL (SEM ALTERAÇÃO) */
-body {
+/* 🖼️ FUNDO COM BLUR SUAVE */
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+
   background-image: url("WhatsApp%20Image%202026-04-21%20at%2021.03.24.jpeg");
   background-position: center;
   background-size: cover;
   background-repeat: no-repeat;
+
+  filter: blur(4px);          /* 🔥 blur leve */
+  transform: scale(1.05);     /* evita bordas do blur */
+
+  z-index: -2;
 }
 
-/* 🖼️ IMAGENS LATERAIS (SEM ALTERAÇÃO) */
+/* 🌑 CAMADA DE TRANSPARÊNCIA */
+body::after {
+  content: "";
+  position: fixed;
+  inset: 0;
+
+  background: rgba(0,0,0,0.3); /* 🔥 leve transparência */
+
+  z-index: -1;
+}
+
+/* 🖼️ LATERAIS (SEM ALTERAÇÃO) */
 .lateral {
   position: fixed;
   top: 0;
   height: 100%;
-  opacity: 1; /* sem transparência */
-  z-index: -1;
+  z-index: 0;
 }
 
-.lateral.left {
-  left: 0;
-}
-
-.lateral.right {
-  right: 0;
-}
+.lateral.left { left: 0; }
+.lateral.right { right: 0; }
 
 /* container */
 .container {
@@ -43,13 +57,14 @@ body {
   margin: auto;
   padding: 20px;
   text-align: center;
+  position: relative;
+  z-index: 1;
 }
 
 /* título */
 .logo {
   font-size: 34px;
   font-weight: bold;
-  color: #ffffff;
   text-shadow: 2px 2px 6px black;
 }
 
@@ -127,7 +142,6 @@ button {
   padding: 10px;
   border-radius: 10px;
 }
-
 </style>
 </head>
 
