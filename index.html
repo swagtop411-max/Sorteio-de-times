@@ -9,13 +9,10 @@ body {
   margin: 0;
   font-family: Arial;
   color: white;
-  overflow-x: hidden;
-
-  /* 🔵 FUNDO AZUL ESCURO */
   background: linear-gradient(135deg, #020617, #0f172a, #1e3a8a);
 }
 
-/* 🖼️ LATERAIS (mantidas) */
+/* laterais */
 .lateral {
   position: fixed;
   top: 0;
@@ -26,7 +23,6 @@ body {
 .lateral.left { left: 0; }
 .lateral.right { right: 0; }
 
-/* container */
 .container {
   max-width: 900px;
   margin: auto;
@@ -36,25 +32,21 @@ body {
   z-index: 1;
 }
 
-/* título */
 .logo {
   font-size: 34px;
   font-weight: bold;
-  text-shadow: 2px 2px 6px black;
 }
 
-/* 🏐 bola animada */
+/* bola */
 .bola {
   font-size: 40px;
-  animation: quicar 1s infinite ease-in-out;
+  animation: quicar 1s infinite;
 }
 
 @keyframes quicar {
-  0%,100%{transform:translateY(0);}
-  50%{transform:translateY(-15px);}
+  50% { transform: translateY(-15px); }
 }
 
-/* cards */
 .card {
   background: rgba(0,0,0,0.6);
   padding: 15px;
@@ -62,7 +54,6 @@ body {
   margin-bottom: 15px;
 }
 
-/* inputs */
 input, select, button {
   margin: 5px;
   padding: 10px;
@@ -70,47 +61,23 @@ input, select, button {
   border: none;
 }
 
-input, select {
-  width: 200px;
-}
+button { cursor: pointer; }
 
-/* botões */
-button {
-  cursor: pointer;
-  font-weight: bold;
-}
+.sortear { background: gold; color: black; }
+.reset { background: red; color: white; }
 
-.sortear {
-  background: gold;
-  color: black;
-}
-
-.reset {
-  background: red;
-  color: white;
-}
-
-/* times */
 #times {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 15px;
 }
 
-/* animação */
 .time {
   background: rgba(0,0,0,0.7);
   padding: 10px;
   border-radius: 10px;
-  animation: aparecer 0.4s ease;
 }
 
-@keyframes aparecer {
-  from {opacity:0; transform:scale(0.8);}
-  to {opacity:1; transform:scale(1);}
-}
-
-/* ranking */
 .ranking {
   margin-top: 20px;
   background: rgba(0,0,0,0.7);
@@ -122,7 +89,6 @@ button {
 
 <body>
 
-<!-- laterais -->
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
 
@@ -165,62 +131,85 @@ button {
 </div>
 
 <script>
-let jogadores=[];
+let jogadores = [];
+let timesSalvos = [];
 
+// salvar jogadores
 function salvarJogadores(){
-  localStorage.setItem("jogadores",JSON.stringify(jogadores));
+  localStorage.setItem("jogadores", JSON.stringify(jogadores));
 }
 
-function carregarJogadores(){
-  const dados=localStorage.getItem("jogadores");
-  if(dados){
-    jogadores=JSON.parse(dados);
-    atualizarLista();
+// salvar times
+function salvarTimes(){
+  localStorage.setItem("times", JSON.stringify(timesSalvos));
+}
+
+// carregar tudo
+function carregarDados(){
+  const j = localStorage.getItem("jogadores");
+  const t = localStorage.getItem("times");
+
+  if(j) jogadores = JSON.parse(j);
+  if(t) timesSalvos = JSON.parse(t);
+
+  atualizarLista();
+
+  if(timesSalvos.length > 0){
+    mostrarTimes(timesSalvos);
+    gerarRanking(timesSalvos);
   }
 }
 
+// adicionar
 function adicionarJogador(){
-  const nome=document.getElementById("nome").value.trim();
-  const genero=document.getElementById("genero").value;
-  const nivel=parseInt(document.getElementById("nivel").value);
+  const nome = document.getElementById("nome").value.trim();
+  const genero = document.getElementById("genero").value;
+  const nivel = parseInt(document.getElementById("nivel").value);
 
   if(!nome) return alert("Digite o nome!");
 
-  jogadores.push({nome,genero,nivel});
+  jogadores.push({nome, genero, nivel});
   atualizarLista();
   salvarJogadores();
 
   document.getElementById("nome").value="";
 }
 
+// lista
 function atualizarLista(){
-  const lista=document.getElementById("lista");
-  lista.innerHTML="";
+  const lista = document.getElementById("lista");
+  lista.innerHTML = "";
 
   jogadores.forEach((j,i)=>{
-    const li=document.createElement("li");
-    li.innerHTML=`${j.nome} (N${j.nivel}) 
+    const li = document.createElement("li");
+    li.innerHTML = `${j.nome} (N${j.nivel})
     <button onclick="removerJogador(${i})">❌</button>`;
     lista.appendChild(li);
   });
 }
 
+// remover
 function removerJogador(i){
   jogadores.splice(i,1);
   atualizarLista();
   salvarJogadores();
 }
 
+// reset
 function resetarTimes(){
+  timesSalvos = [];
+  localStorage.removeItem("times");
+
   document.getElementById("times").innerHTML="";
   document.getElementById("ranking").innerHTML="";
 }
 
+// sorteio
 function sortearTimes(){
-  let homens=jogadores.filter(j=>j.genero==="M");
-  let mulheres=jogadores.filter(j=>j.genero==="F");
+  let homens = jogadores.filter(j=>j.genero==="M");
+  let mulheres = jogadores.filter(j=>j.genero==="F");
 
-  let times=[];
+  let times = [];
 
   homens.sort(()=>Math.random()-0.5);
   mulheres.sort(()=>Math.random()-0.5);
@@ -239,35 +228,40 @@ function sortearTimes(){
     times.push(time);
   }
 
+  timesSalvos = times;
+  salvarTimes();
+
   mostrarTimes(times);
   gerarRanking(times);
 }
 
+// mostrar
 function mostrarTimes(times){
-  const div=document.getElementById("times");
+  const div = document.getElementById("times");
   div.innerHTML="";
 
   times.forEach((time,i)=>{
-    let html=`<div class="time"><h3>Time ${i+1}</h3>`;
+    let html = `<div class="time"><h3>Time ${i+1}</h3>`;
     time.forEach(j=>{
-      html+=`<p>${j.nome} (N${j.nivel})</p>`;
+      html += `<p>${j.nome} (N${j.nivel})</p>`;
     });
-    html+=`</div>`;
-    div.innerHTML+=html;
+    html += `</div>`;
+    div.innerHTML += html;
   });
 }
 
+// ranking
 function gerarRanking(times){
   let ranking=[];
 
   times.forEach((time,i)=>{
-    let total=time.reduce((a,j)=>a+j.nivel,0);
-    ranking.push({time:i+1,pontos:total});
+    let total = time.reduce((a,j)=>a+j.nivel,0);
+    ranking.push({time:i+1, pontos:total});
   });
 
   ranking.sort((a,b)=>b.pontos-a.pontos);
 
-  const div=document.getElementById("ranking");
+  const div = document.getElementById("ranking");
   div.innerHTML="<h3>Ranking</h3>";
 
   ranking.forEach((r,i)=>{
@@ -275,7 +269,7 @@ function gerarRanking(times){
   });
 }
 
-carregarJogadores();
+carregarDados();
 </script>
 
 </body>
