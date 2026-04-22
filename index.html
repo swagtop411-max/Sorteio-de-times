@@ -10,37 +10,12 @@ body {
   font-family: Arial;
   color: white;
   overflow-x: hidden;
+
+  /* 🔵 FUNDO AZUL ESCURO */
+  background: linear-gradient(135deg, #020617, #0f172a, #1e3a8a);
 }
 
-/* 🖼️ FUNDO COM BLUR SUAVE */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-
-  background-image: ;
-  background-position: center;
-  background-size: cover;
-  background-repeat: no-repeat;
-
-  filter: blur(4px);          /* 🔥 blur leve */
-  transform: scale(1.05);     /* evita bordas do blur */
-
-  z-index: -2;
-}
-
-/* 🌑 CAMADA DE TRANSPARÊNCIA */
-body::after {
-  content: "";
-  position: fixed;
-  inset: 0;
-
-  background: rgba(0,0,0,0.3); /* 🔥 leve transparência */
-
-  z-index: -1;
-}
-
-/* 🖼️ LATERAIS (SEM ALTERAÇÃO) */
+/* 🖼️ LATERAIS (mantidas) */
 .lateral {
   position: fixed;
   top: 0;
@@ -68,7 +43,7 @@ body::after {
   text-shadow: 2px 2px 6px black;
 }
 
-/* bola animada */
+/* 🏐 bola animada */
 .bola {
   font-size: 40px;
   animation: quicar 1s infinite ease-in-out;
@@ -153,7 +128,7 @@ button {
 
 <div class="container">
 
-<div class="logo">🏐 Sistema Inteligente de Sorteio 🏐</div>
+<div class="logo">🏐 M&M VOLEI</div>
 <div class="bola">🏐</div>
 
 <div class="card">
