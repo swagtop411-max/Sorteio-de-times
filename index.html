@@ -2,88 +2,111 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>M&M Vôlei PRO</title>
+<title>M&M Vôlei PRO MAX</title>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
-body {
-  margin: 0;
-  font-family: Arial;
-  color: white;
-  background: linear-gradient(135deg, #020617, #0f172a, #1e3a8a);
+body{
+  margin:0;
+  font-family:Arial;
+  color:white;
+  background:linear-gradient(135deg,#020617,#0f172a,#1e3a8a);
 }
 
-.container {
-  max-width: 900px;
-  margin: auto;
-  padding: 20px;
-  text-align: center;
+/* laterais */
+.lateral{
+  position:fixed;
+  top:0;
+  height:100%;
+  z-index:0;
+}
+.left{left:0;}
+.right{right:0;}
+
+.container{
+  max-width:900px;
+  margin:auto;
+  padding:20px;
+  text-align:center;
+  position:relative;
+  z-index:1;
 }
 
-.card {
-  background: rgba(0,0,0,0.6);
-  padding: 15px;
-  border-radius: 12px;
-  margin-bottom: 15px;
+.logo{font-size:32px;font-weight:bold;}
+
+.card{
+  background:rgba(0,0,0,0.6);
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:15px;
 }
 
-input, select, button {
-  margin: 5px;
-  padding: 10px;
-  border-radius: 8px;
-  border: none;
+input,select,button{
+  margin:5px;
+  padding:10px;
+  border-radius:8px;
+  border:none;
 }
 
-button { cursor: pointer; }
+button{cursor:pointer;}
+.sortear{background:gold;color:black;}
+.reset{background:red;color:white;}
 
-#times {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 15px;
+#times{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
 }
 
-.time {
-  background: rgba(0,0,0,0.7);
-  padding: 10px;
-  border-radius: 10px;
+.time{
+  background:rgba(0,0,0,0.7);
+  padding:10px;
+  border-radius:10px;
 }
 
-.fila {
-  background: rgba(255,255,255,0.1);
-  padding: 10px;
-  border-radius: 10px;
+.fila{
+  margin-top:20px;
+  background:rgba(255,255,255,0.1);
+  padding:10px;
+  border-radius:10px;
 }
 </style>
 </head>
 
 <body>
 
+<img src="MeM.jpg" class="lateral left">
+<img src="MeM.jpg" class="lateral right">
+
 <div class="container">
 
-<h2>🏐 M&M VOLEI PRO</h2>
+<div class="logo">🏐 M&M VOLEI PRO MAX</div>
 
 <div class="card">
-  <input id="nome" placeholder="Nome">
-  <select id="genero">
-    <option value="M">Masculino</option>
-    <option value="F">Feminino</option>
-  </select>
-  <select id="nivel">
-    <option value="1">N1</option>
-    <option value="2">N2</option>
-    <option value="3">N3</option>
-    <option value="4">N4</option>
-    <option value="5">N5</option>
-  </select>
-  <button onclick="add()">Adicionar</button>
+<input id="nome" placeholder="Nome">
+<select id="genero">
+<option value="M">Masculino</option>
+<option value="F">Feminino</option>
+</select>
+<select id="nivel">
+<option value="1">N1</option>
+<option value="2">N2</option>
+<option value="3">N3</option>
+<option value="4">N4</option>
+<option value="5">N5</option>
+</select>
+<button onclick="add()">Adicionar</button>
 </div>
 
 <div class="card">
-  <h3>Jogadores</h3>
-  <ul id="lista"></ul>
+<ul id="lista"></ul>
 </div>
 
-<button onclick="sortear()">Sortear Balanceado</button>
-<button onclick="resetar()">Resetar</button>
+<button class="sortear" onclick="reorganizar()">🎮 Refazer Equilibrado</button>
+<button class="reset" onclick="resetar()">Resetar</button>
+
+<canvas id="grafico"></canvas>
 
 <div id="times"></div>
 <div id="fila" class="fila"></div>
@@ -91,197 +114,194 @@ button { cursor: pointer; }
 </div>
 
 <script>
-let jogadores = [];
-let fila = [];
-let times = [];
+let jogadores=[];
+let fila=[];
+let times=[];
 
+/* salvar */
 function salvar(){
-  localStorage.setItem("jogadores", JSON.stringify(jogadores));
-  localStorage.setItem("fila", JSON.stringify(fila));
-  localStorage.setItem("times", JSON.stringify(times));
+localStorage.setItem("jogadores",JSON.stringify(jogadores));
+localStorage.setItem("fila",JSON.stringify(fila));
+localStorage.setItem("times",JSON.stringify(times));
 }
 
+/* carregar */
 function carregar(){
-  jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]");
-  fila = JSON.parse(localStorage.getItem("fila") || "[]");
-  times = JSON.parse(localStorage.getItem("times") || "[]");
+jogadores=JSON.parse(localStorage.getItem("jogadores")||"[]");
+fila=JSON.parse(localStorage.getItem("fila")||"[]");
+times=JSON.parse(localStorage.getItem("times")||"[]");
 
-  renderLista();
-  renderTimes();
-  renderFila();
+render();
 }
 
 /* adicionar */
 function add(){
-  const nome = nomeInput();
-  const genero = document.getElementById("genero").value;
-  const nivel = parseInt(document.getElementById("nivel").value);
+let nome=document.getElementById("nome").value.trim();
+let genero=document.getElementById("genero").value;
+let nivel=parseInt(document.getElementById("nivel").value);
 
-  if(!nome) return alert("Digite o nome");
+if(!nome)return alert("Digite nome");
 
-  let j = {nome, genero, nivel};
+let j={nome,genero,nivel};
 
-  jogadores.push(j);
-  fila.push(j);
+jogadores.push(j);
+fila.push(j);
 
-  tentarFormarTimeBalanceado();
-  salvar();
+balanceamentoGlobal();
 
-  document.getElementById("nome").value="";
-  renderLista();
+salvar();
+render();
+
+document.getElementById("nome").value="";
 }
 
-function nomeInput(){
-  return document.getElementById("nome").value.trim();
+/* 🔥 MOTOR PRINCIPAL */
+function balanceamentoGlobal(){
+
+// junta tudo
+let pool=[...fila,...times.flat()];
+times=[];
+fila=[];
+
+// separa
+let homens=pool.filter(j=>j.genero==="M");
+let mulheres=pool.filter(j=>j.genero==="F");
+
+// ordena por nível
+homens.sort((a,b)=>b.nivel-a.nivel);
+mulheres.sort((a,b)=>b.nivel-a.nivel);
+
+// cria times equilibrados
+while(homens.length>=2 && mulheres.length>=2){
+
+let time=[];
+
+// alterna forte/fraco
+time.push(homens.shift());
+time.push(homens.pop());
+time.push(mulheres.shift());
+time.push(mulheres.pop());
+
+times.push(time);
 }
 
-/* 🧠 FORMAR TIME BALANCEADO */
-function tentarFormarTimeBalanceado(){
+// sobra vira fila
+fila=[...homens,...mulheres];
 
-  let homens = fila.filter(j=>j.genero==="M");
-  let mulheres = fila.filter(j=>j.genero==="F");
-
-  if(homens.length < 2 || mulheres.length < 2) return;
-
-  let melhor = null;
-  let melhorScore = Infinity;
-
-  // tenta várias combinações
-  for(let t=0; t<200; t++){
-    let h = [...homens].sort(()=>Math.random()-0.5);
-    let m = [...mulheres].sort(()=>Math.random()-0.5);
-
-    let time = [h[0],h[1],m[0],m[1]];
-    let score = time.reduce((a,j)=>a+j.nivel,0);
-
-    if(score < melhorScore){
-      melhorScore = score;
-      melhor = time;
-    }
-  }
-
-  // remove da fila
-  melhor.forEach(j=>{
-    fila.splice(fila.indexOf(j),1);
-  });
-
-  times.push(melhor);
-
-  balancearTimes(); // 🔥 troca inteligente
+// 🔁 ajuste fino
+trocaInteligente();
 }
 
-/* 🔁 TROCA INTELIGENTE */
-function balancearTimes(){
-  if(times.length < 2) return;
+/* 🔁 troca inteligente */
+function trocaInteligente(){
 
-  let melhorou = true;
+if(times.length<2)return;
 
-  while(melhorou){
-    melhorou = false;
+let melhorou=true;
 
-    for(let i=0;i<times.length;i++){
-      for(let j=i+1;j<times.length;j++){
+while(melhorou){
+melhorou=false;
 
-        let t1 = times[i];
-        let t2 = times[j];
+for(let i=0;i<times.length;i++){
+for(let j=i+1;j<times.length;j++){
 
-        let soma1 = soma(t1);
-        let soma2 = soma(t2);
+let t1=times[i];
+let t2=times[j];
 
-        // tenta trocar jogadores
-        for(let a=0;a<4;a++){
-          for(let b=0;b<4;b++){
+for(let a=0;a<4;a++){
+for(let b=0;b<4;b++){
 
-            if(t1[a].genero !== t2[b].genero) continue;
+if(t1[a].genero!==t2[b].genero)continue;
 
-            // troca
-            let temp = t1[a];
-            t1[a] = t2[b];
-            t2[b] = temp;
+let before=Math.abs(soma(t1)-soma(t2));
 
-            let novaDif = Math.abs(soma(t1) - soma(t2));
-            let antigaDif = Math.abs(soma1 - soma2);
+[t1[a],t2[b]]=[t2[b],t1[a]];
 
-            if(novaDif < antigaDif){
-              melhorou = true;
-            } else {
-              // desfaz
-              temp = t1[a];
-              t1[a] = t2[b];
-              t2[b] = temp;
-            }
-          }
-        }
-      }
-    }
-  }
+let after=Math.abs(soma(t1)-soma(t2));
 
-  renderTimes();
+if(after<before){
+melhorou=true;
+}else{
+[t1[a],t2[b]]=[t2[b],t1[a]];
+}
+
+}
+}
+}
+}
+}
 }
 
 /* soma */
-function soma(time){
-  return time.reduce((a,j)=>a+j.nivel,0);
+function soma(t){
+return t.reduce((a,j)=>a+j.nivel,0);
 }
 
-/* sorteio geral */
-function sortear(){
-  fila = [...jogadores];
-  times = [];
-
-  while(true){
-    let antes = times.length;
-    tentarFormarTimeBalanceado();
-    if(times.length === antes) break;
-  }
-
-  salvar();
-  renderTimes();
-  renderFila();
+/* reorganizar botão */
+function reorganizar(){
+balanceamentoGlobal();
+salvar();
+render();
 }
 
 /* reset */
 function resetar(){
-  times = [];
-  fila = [...jogadores];
-  salvar();
-  renderTimes();
-  renderFila();
+times=[];
+fila=[...jogadores];
+salvar();
+render();
 }
 
 /* render */
-function renderLista(){
-  const ul = document.getElementById("lista");
-  ul.innerHTML="";
-  jogadores.forEach((j,i)=>{
-    ul.innerHTML += `<li>${j.nome} (${j.genero} N${j.nivel})</li>`;
-  });
+function render(){
+
+// lista
+let ul=document.getElementById("lista");
+ul.innerHTML="";
+jogadores.forEach(j=>{
+ul.innerHTML+=`<li>${j.nome} (${j.genero} N${j.nivel})</li>`;
+});
+
+// times
+let div=document.getElementById("times");
+div.innerHTML="";
+times.forEach((t,i)=>{
+let html=`<div class="time"><h3>Time ${i+1} (${soma(t)})</h3>`;
+t.forEach(j=>html+=`<p>${j.nome}</p>`);
+html+="</div>";
+div.innerHTML+=html;
+});
+
+// fila
+let f=document.getElementById("fila");
+f.innerHTML="<h3>Fila</h3>";
+fila.forEach(j=>{
+f.innerHTML+=`<p>${j.nome} (${j.genero})</p>`;
+});
+
+// gráfico
+desenharGrafico();
 }
 
-function renderTimes(){
-  const div = document.getElementById("times");
-  div.innerHTML="";
+/* 📊 gráfico */
+function desenharGrafico(){
 
-  times.forEach((t,i)=>{
-    let total = soma(t);
+let ctx=document.getElementById("grafico");
 
-    let html = `<div class="time"><h3>Time ${i+1} (${total})</h3>`;
-    t.forEach(j=>{
-      html += `<p>${j.nome} N${j.nivel}</p>`;
-    });
-    html += "</div>";
+let dados=times.map(t=>soma(t));
 
-    div.innerHTML += html;
-  });
+if(window.grafico)window.grafico.destroy();
+
+window.grafico=new Chart(ctx,{
+type:'bar',
+data:{
+labels:times.map((_,i)=>"Time "+(i+1)),
+datasets:[{
+label:"Força do Time",
+data:dados
+}]
 }
-
-function renderFila(){
-  const div = document.getElementById("fila");
-
-  div.innerHTML="<h3>Fila</h3>";
-  fila.forEach(j=>{
-    div.innerHTML += `<p>${j.nome} (${j.genero})</p>`;
-  });
+});
 }
 
 carregar();
