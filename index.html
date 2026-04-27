@@ -33,13 +33,21 @@ body{
   z-index:1;
 }
 
-.logo{font-size:32px;font-weight:bold;}
-
 .card{
-  background:rgba(0,0,0,0.6);
+  background:rgba(0,0,0,0.75);
   padding:15px;
   border-radius:12px;
   margin-bottom:15px;
+}
+
+li, p{
+  color:#fff;
+  font-weight:600;
+  text-shadow:0 0 6px rgba(0,0,0,0.8);
+}
+
+.time h3{
+  color:#facc15;
 }
 
 input,select,button{
@@ -53,6 +61,14 @@ button{cursor:pointer;}
 .sortear{background:gold;color:black;}
 .reset{background:red;color:white;}
 
+.remove{
+  background:#ef4444;
+  color:white;
+  margin-left:10px;
+  padding:4px 8px;
+  border-radius:6px;
+}
+
 #times{
   display:grid;
   grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
@@ -60,14 +76,14 @@ button{cursor:pointer;}
 }
 
 .time{
-  background:rgba(0,0,0,0.7);
+  background:rgba(0,0,0,0.75);
   padding:10px;
   border-radius:10px;
 }
 
 .fila{
   margin-top:20px;
-  background:rgba(255,255,255,0.1);
+  background:rgba(255,255,255,0.15);
   padding:10px;
   border-radius:10px;
 }
@@ -81,7 +97,7 @@ button{cursor:pointer;}
 
 <div class="container">
 
-<div class="logo">🏐 M&M VOLEI PRO MAX</div>
+<h2>🏐 M&M VOLEI PRO MAX</h2>
 
 <div class="card">
 <input id="nome" placeholder="Nome">
@@ -155,28 +171,47 @@ render();
 document.getElementById("nome").value="";
 }
 
-/* 🔥 MOTOR PRINCIPAL */
+/* ❌ REMOVER JOGADOR */
+function removerJogador(nome){
+
+// remove da lista geral
+jogadores = jogadores.filter(j=>j.nome !== nome);
+
+// remove da fila
+fila = fila.filter(j=>j.nome !== nome);
+
+// remove dos times
+times.forEach(t=>{
+  for(let i=t.length-1;i>=0;i--){
+    if(t[i].nome === nome){
+      t.splice(i,1);
+    }
+  }
+});
+
+// 🔥 reorganiza tudo
+balanceamentoGlobal();
+
+salvar();
+render();
+}
+
+/* 🔥 MOTOR */
 function balanceamentoGlobal(){
 
-// junta tudo
 let pool=[...fila,...times.flat()];
 times=[];
 fila=[];
 
-// separa
 let homens=pool.filter(j=>j.genero==="M");
 let mulheres=pool.filter(j=>j.genero==="F");
 
-// ordena por nível
 homens.sort((a,b)=>b.nivel-a.nivel);
 mulheres.sort((a,b)=>b.nivel-a.nivel);
 
-// cria times equilibrados
 while(homens.length>=2 && mulheres.length>=2){
 
 let time=[];
-
-// alterna forte/fraco
 time.push(homens.shift());
 time.push(homens.pop());
 time.push(mulheres.shift());
@@ -185,14 +220,13 @@ time.push(mulheres.pop());
 times.push(time);
 }
 
-// sobra vira fila
 fila=[...homens,...mulheres];
 
-// 🔁 ajuste fino
 trocaInteligente();
+validarTimes();
 }
 
-/* 🔁 troca inteligente */
+/* troca */
 function trocaInteligente(){
 
 if(times.length<2)return;
@@ -208,8 +242,8 @@ for(let j=i+1;j<times.length;j++){
 let t1=times[i];
 let t2=times[j];
 
-for(let a=0;a<4;a++){
-for(let b=0;b<4;b++){
+for(let a=0;a<t1.length;a++){
+for(let b=0;b<t2.length;b++){
 
 if(t1[a].genero!==t2[b].genero)continue;
 
@@ -232,19 +266,42 @@ melhorou=true;
 }
 }
 
+/* valida */
+function validarTimes(){
+times.forEach(time=>{
+
+let homens=time.filter(j=>j.genero==="M");
+let mulheres=time.filter(j=>j.genero==="F");
+
+while(homens.length>2){
+let r=homens.pop();
+time.splice(time.indexOf(r),1);
+fila.push(r);
+homens=time.filter(j=>j.genero==="M");
+}
+
+while(mulheres.length>2){
+let r=mulheres.pop();
+time.splice(time.indexOf(r),1);
+fila.push(r);
+mulheres=time.filter(j=>j.genero==="F");
+}
+
+});
+}
+
 /* soma */
 function soma(t){
 return t.reduce((a,j)=>a+j.nivel,0);
 }
 
-/* reorganizar botão */
+/* botões */
 function reorganizar(){
 balanceamentoGlobal();
 salvar();
 render();
 }
 
-/* reset */
 function resetar(){
 times=[];
 fila=[...jogadores];
@@ -255,11 +312,15 @@ render();
 /* render */
 function render(){
 
-// lista
+// lista com botão ❌
 let ul=document.getElementById("lista");
 ul.innerHTML="";
 jogadores.forEach(j=>{
-ul.innerHTML+=`<li>${j.nome} (${j.genero} N${j.nivel})</li>`;
+ul.innerHTML+=`
+<li>
+${j.nome} (${j.genero} N${j.nivel})
+<button class="remove" onclick="removerJogador('${j.nome}')">❌</button>
+</li>`;
 });
 
 // times
@@ -280,14 +341,12 @@ f.innerHTML+=`<p>${j.nome} (${j.genero})</p>`;
 });
 
 // gráfico
-desenharGrafico();
+grafico();
 }
 
-/* 📊 gráfico */
-function desenharGrafico(){
-
+/* gráfico */
+function grafico(){
 let ctx=document.getElementById("grafico");
-
 let dados=times.map(t=>soma(t));
 
 if(window.grafico)window.grafico.destroy();
@@ -297,7 +356,7 @@ type:'bar',
 data:{
 labels:times.map((_,i)=>"Time "+(i+1)),
 datasets:[{
-label:"Força do Time",
+label:"Equilíbrio",
 data:dados
 }]
 }
