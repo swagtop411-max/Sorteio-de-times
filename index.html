@@ -14,7 +14,6 @@ body{
   background:linear-gradient(135deg,#020617,#0f172a,#1e3a8a);
 }
 
-/* laterais */
 .lateral{
   position:fixed;
   top:0;
@@ -40,16 +39,6 @@ body{
   margin-bottom:15px;
 }
 
-li, p{
-  color:#fff;
-  font-weight:600;
-  text-shadow:0 0 6px rgba(0,0,0,0.8);
-}
-
-.time h3{
-  color:#facc15;
-}
-
 input,select,button{
   margin:5px;
   padding:10px;
@@ -58,21 +47,11 @@ input,select,button{
 }
 
 button{cursor:pointer;}
-.sortear{background:gold;color:black;}
-.reset{background:red;color:white;}
 
 .remove{
   background:#ef4444;
   color:white;
   margin-left:10px;
-  padding:4px 8px;
-  border-radius:6px;
-}
-
-#times{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:15px;
 }
 
 .time{
@@ -81,12 +60,21 @@ button{cursor:pointer;}
   border-radius:10px;
 }
 
+#times{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:15px;
+}
+
 .fila{
   margin-top:20px;
-  background:rgba(255,255,255,0.15);
+  background:rgba(255,255,255,0.1);
   padding:10px;
   border-radius:10px;
 }
+
+h3{color:#facc15;}
+
 </style>
 </head>
 
@@ -119,8 +107,12 @@ button{cursor:pointer;}
 <ul id="lista"></ul>
 </div>
 
-<button class="sortear" onclick="reorganizar()">🎮 Refazer Equilibrado</button>
-<button class="reset" onclick="resetar()">Resetar</button>
+<button onclick="reorganizar()">🎮 Refazer Equilibrado</button>
+<button onclick="corrigirTimes()">🤖 Corrigir</button>
+<button onclick="resetar()">Resetar</button>
+
+<div id="alerta"></div>
+<div id="sugestao"></div>
 
 <canvas id="grafico"></canvas>
 
@@ -130,29 +122,26 @@ button{cursor:pointer;}
 </div>
 
 <script>
+
 let jogadores=[];
 let fila=[];
 let times=[];
 
-/* salvar */
 function salvar(){
 localStorage.setItem("jogadores",JSON.stringify(jogadores));
 localStorage.setItem("fila",JSON.stringify(fila));
 localStorage.setItem("times",JSON.stringify(times));
 }
 
-/* carregar */
 function carregar(){
 jogadores=JSON.parse(localStorage.getItem("jogadores")||"[]");
 fila=JSON.parse(localStorage.getItem("fila")||"[]");
 times=JSON.parse(localStorage.getItem("times")||"[]");
-
 render();
 }
 
-/* adicionar */
 function add(){
-let nome=document.getElementById("nome").value.trim();
+let nome=nomeInput();
 let genero=document.getElementById("genero").value;
 let nivel=parseInt(document.getElementById("nivel").value);
 
@@ -171,32 +160,27 @@ render();
 document.getElementById("nome").value="";
 }
 
-/* ❌ REMOVER JOGADOR */
+function nomeInput(){
+return document.getElementById("nome").value.trim();
+}
+
 function removerJogador(nome){
 
-// remove da lista geral
-jogadores = jogadores.filter(j=>j.nome !== nome);
+jogadores=jogadores.filter(j=>j.nome!==nome);
+fila=fila.filter(j=>j.nome!==nome);
 
-// remove da fila
-fila = fila.filter(j=>j.nome !== nome);
-
-// remove dos times
 times.forEach(t=>{
-  for(let i=t.length-1;i>=0;i--){
-    if(t[i].nome === nome){
-      t.splice(i,1);
-    }
-  }
+for(let i=t.length-1;i>=0;i--){
+if(t[i].nome===nome) t.splice(i,1);
+}
 });
 
-// 🔥 reorganiza tudo
 balanceamentoGlobal();
 
 salvar();
 render();
 }
 
-/* 🔥 MOTOR */
 function balanceamentoGlobal(){
 
 let pool=[...fila,...times.flat()];
@@ -211,11 +195,12 @@ mulheres.sort((a,b)=>b.nivel-a.nivel);
 
 while(homens.length>=2 && mulheres.length>=2){
 
-let time=[];
-time.push(homens.shift());
-time.push(homens.pop());
-time.push(mulheres.shift());
-time.push(mulheres.pop());
+let time=[
+homens.shift(),
+homens.pop(),
+mulheres.shift(),
+mulheres.pop()
+];
 
 times.push(time);
 }
@@ -226,7 +211,6 @@ trocaInteligente();
 validarTimes();
 }
 
-/* troca */
 function trocaInteligente(){
 
 if(times.length<2)return;
@@ -266,8 +250,8 @@ melhorou=true;
 }
 }
 
-/* valida */
 function validarTimes(){
+
 times.forEach(time=>{
 
 let homens=time.filter(j=>j.genero==="M");
@@ -290,12 +274,10 @@ mulheres=time.filter(j=>j.genero==="F");
 });
 }
 
-/* soma */
 function soma(t){
 return t.reduce((a,j)=>a+j.nivel,0);
 }
 
-/* botões */
 function reorganizar(){
 balanceamentoGlobal();
 salvar();
@@ -309,43 +291,133 @@ salvar();
 render();
 }
 
+/* 🎯 sugestão */
+function sugerirTroca(){
+
+let melhor=null;
+let ganhoMax=0;
+
+for(let i=0;i<times.length;i++){
+for(let j=i+1;j<times.length;j++){
+
+let t1=times[i];
+let t2=times[j];
+
+for(let a=0;a<t1.length;a++){
+for(let b=0;b<t2.length;b++){
+
+if(t1[a].genero!==t2[b].genero)continue;
+
+let before=Math.abs(soma(t1)-soma(t2));
+
+[t1[a],t2[b]]=[t2[b],t1[a]];
+
+let after=Math.abs(soma(t1)-soma(t2));
+
+[t1[a],t2[b]]=[t2[b],t1[a]];
+
+let ganho=before-after;
+
+if(ganho>ganhoMax){
+ganhoMax=ganho;
+melhor={i,j,a,b};
+}
+
+}
+}
+}
+}
+
+if(!melhor){
+document.getElementById("sugestao").innerHTML="✅ Já equilibrado";
+return null;
+}
+
+let t1=times[melhor.i];
+let t2=times[melhor.j];
+
+document.getElementById("sugestao").innerHTML=
+`🎯 Trocar ${t1[melhor.a].nome} por ${t2[melhor.b].nome}`;
+
+return melhor;
+}
+
+/* 🤖 corrigir */
+function corrigirTimes(){
+
+let troca=sugerirTroca();
+if(!troca)return;
+
+let t1=times[troca.i];
+let t2=times[troca.j];
+
+[t1[troca.a],t2[troca.b]]=[t2[troca.b],t1[troca.a]];
+
+validarTimes();
+trocaInteligente();
+
+salvar();
+render();
+}
+
 /* render */
 function render(){
 
-// lista com botão ❌
 let ul=document.getElementById("lista");
 ul.innerHTML="";
 jogadores.forEach(j=>{
-ul.innerHTML+=`
-<li>
-${j.nome} (${j.genero} N${j.nivel})
+ul.innerHTML+=`<li>${j.nome} (${j.genero} N${j.nivel})
 <button class="remove" onclick="removerJogador('${j.nome}')">❌</button>
 </li>`;
 });
 
-// times
+let niveis=times.map(t=>soma(t));
+let diff=Math.max(...niveis,0)-Math.min(...niveis,0);
+
+let alerta=document.getElementById("alerta");
+
+if(diff<=2){
+alerta.innerHTML="✅ Equilibrado";
+alerta.style.color="#22c55e";
+}else if(diff<=5){
+alerta.innerHTML="⚠️ Médio";
+alerta.style.color="#facc15";
+}else{
+alerta.innerHTML="🚨 Desbalanceado";
+alerta.style.color="#ef4444";
+}
+
 let div=document.getElementById("times");
 div.innerHTML="";
+
 times.forEach((t,i)=>{
-let html=`<div class="time"><h3>Time ${i+1} (${soma(t)})</h3>`;
-t.forEach(j=>html+=`<p>${j.nome}</p>`);
+
+let total=soma(t);
+let media=(total/t.length).toFixed(1);
+
+let cor = diff<=2 ? "#22c55e" : diff<=5 ? "#facc15" : "#ef4444";
+
+let html=`<div class="time" style="border:3px solid ${cor}">
+<h3>🏐 Time ${i+1}</h3>
+<p>🔥 Nível ${total} | Média ${media}</p>`;
+
+t.forEach(j=>html+=`<p>${j.nome} (N${j.nivel})</p>`);
+
 html+="</div>";
+
 div.innerHTML+=html;
 });
 
-// fila
 let f=document.getElementById("fila");
 f.innerHTML="<h3>Fila</h3>";
-fila.forEach(j=>{
-f.innerHTML+=`<p>${j.nome} (${j.genero})</p>`;
-});
+fila.forEach(j=>f.innerHTML+=`<p>${j.nome}</p>`);
 
-// gráfico
 grafico();
+sugerirTroca();
 }
 
-/* gráfico */
 function grafico(){
+
 let ctx=document.getElementById("grafico");
 let dados=times.map(t=>soma(t));
 
@@ -355,15 +427,13 @@ window.grafico=new Chart(ctx,{
 type:'bar',
 data:{
 labels:times.map((_,i)=>"Time "+(i+1)),
-datasets:[{
-label:"Equilíbrio",
-data:dados
-}]
+datasets:[{label:"Força",data:dados}]
 }
 });
 }
 
 carregar();
+
 </script>
 
 </body>
