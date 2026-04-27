@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>M&M SISTEMA DE SORTEIO</title>
+<title>M&M Vôlei PRO</title>
 
 <style>
 body {
@@ -12,39 +12,11 @@ body {
   background: linear-gradient(135deg, #020617, #0f172a, #1e3a8a);
 }
 
-/* laterais */
-.lateral {
-  position: fixed;
-  top: 0;
-  height: 100%;
-  z-index: 0;
-}
-
-.lateral.left { left: 0; }
-.lateral.right { right: 0; }
-
 .container {
   max-width: 900px;
   margin: auto;
   padding: 20px;
   text-align: center;
-  position: relative;
-  z-index: 1;
-}
-
-.logo {
-  font-size: 34px;
-  font-weight: bold;
-}
-
-/* bola */
-.bola {
-  font-size: 40px;
-  animation: quicar 1s infinite;
-}
-
-@keyframes quicar {
-  50% { transform: translateY(-15px); }
 }
 
 .card {
@@ -63,9 +35,6 @@ input, select, button {
 
 button { cursor: pointer; }
 
-.sortear { background: gold; color: black; }
-.reset { background: red; color: white; }
-
 #times {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
@@ -78,9 +47,8 @@ button { cursor: pointer; }
   border-radius: 10px;
 }
 
-.ranking {
-  margin-top: 20px;
-  background: rgba(0,0,0,0.7);
+.fila {
+  background: rgba(255,255,255,0.1);
   padding: 10px;
   border-radius: 10px;
 }
@@ -89,187 +57,234 @@ button { cursor: pointer; }
 
 <body>
 
-<img src="MeM.jpg" class="lateral left">
-<img src="MeM.jpg" class="lateral right">
-
 <div class="container">
 
-<div class="logo">🏐 SISTEMA INTELIGENTE DE SORTEIO DE TIMES 🏐</div>
-<div class="bola">🏐</div>
+<h2>🏐 M&M VOLEI PRO</h2>
 
 <div class="card">
-  <input type="text" id="nome" placeholder="Nome do jogador">
-
+  <input id="nome" placeholder="Nome">
   <select id="genero">
     <option value="M">Masculino</option>
     <option value="F">Feminino</option>
   </select>
-
   <select id="nivel">
-    <option value="1">Nível 1</option>
-    <option value="2">Nível 2</option>
-    <option value="3">Nível 3</option>
-    <option value="4">Nível 4</option>
-    <option value="5">Nível 5</option>
+    <option value="1">N1</option>
+    <option value="2">N2</option>
+    <option value="3">N3</option>
+    <option value="4">N4</option>
+    <option value="5">N5</option>
   </select>
-
-  <br>
-  <button onclick="adicionarJogador()">+ Adicionar</button>
+  <button onclick="add()">Adicionar</button>
 </div>
 
 <div class="card">
-  <h2>Jogadores</h2>
+  <h3>Jogadores</h3>
   <ul id="lista"></ul>
 </div>
 
-<button class="sortear" onclick="sortearTimes()">Sortear</button>
-<button class="reset" onclick="resetarTimes()">Resetar</button>
+<button onclick="sortear()">Sortear Balanceado</button>
+<button onclick="resetar()">Resetar</button>
 
 <div id="times"></div>
-<div id="ranking" class="ranking"></div>
+<div id="fila" class="fila"></div>
 
 </div>
 
 <script>
 let jogadores = [];
-let timesSalvos = [];
+let fila = [];
+let times = [];
 
-// salvar jogadores
-function salvarJogadores(){
+function salvar(){
   localStorage.setItem("jogadores", JSON.stringify(jogadores));
+  localStorage.setItem("fila", JSON.stringify(fila));
+  localStorage.setItem("times", JSON.stringify(times));
 }
 
-// salvar times
-function salvarTimes(){
-  localStorage.setItem("times", JSON.stringify(timesSalvos));
+function carregar(){
+  jogadores = JSON.parse(localStorage.getItem("jogadores") || "[]");
+  fila = JSON.parse(localStorage.getItem("fila") || "[]");
+  times = JSON.parse(localStorage.getItem("times") || "[]");
+
+  renderLista();
+  renderTimes();
+  renderFila();
 }
 
-// carregar tudo
-function carregarDados(){
-  const j = localStorage.getItem("jogadores");
-  const t = localStorage.getItem("times");
-
-  if(j) jogadores = JSON.parse(j);
-  if(t) timesSalvos = JSON.parse(t);
-
-  atualizarLista();
-
-  if(timesSalvos.length > 0){
-    mostrarTimes(timesSalvos);
-    gerarRanking(timesSalvos);
-  }
-}
-
-// adicionar
-function adicionarJogador(){
-  const nome = document.getElementById("nome").value.trim();
+/* adicionar */
+function add(){
+  const nome = nomeInput();
   const genero = document.getElementById("genero").value;
   const nivel = parseInt(document.getElementById("nivel").value);
 
-  if(!nome) return alert("Digite o nome!");
+  if(!nome) return alert("Digite o nome");
 
-  jogadores.push({nome, genero, nivel});
-  atualizarLista();
-  salvarJogadores();
+  let j = {nome, genero, nivel};
+
+  jogadores.push(j);
+  fila.push(j);
+
+  tentarFormarTimeBalanceado();
+  salvar();
 
   document.getElementById("nome").value="";
+  renderLista();
 }
 
-// lista
-function atualizarLista(){
-  const lista = document.getElementById("lista");
-  lista.innerHTML = "";
+function nomeInput(){
+  return document.getElementById("nome").value.trim();
+}
 
+/* 🧠 FORMAR TIME BALANCEADO */
+function tentarFormarTimeBalanceado(){
+
+  let homens = fila.filter(j=>j.genero==="M");
+  let mulheres = fila.filter(j=>j.genero==="F");
+
+  if(homens.length < 2 || mulheres.length < 2) return;
+
+  let melhor = null;
+  let melhorScore = Infinity;
+
+  // tenta várias combinações
+  for(let t=0; t<200; t++){
+    let h = [...homens].sort(()=>Math.random()-0.5);
+    let m = [...mulheres].sort(()=>Math.random()-0.5);
+
+    let time = [h[0],h[1],m[0],m[1]];
+    let score = time.reduce((a,j)=>a+j.nivel,0);
+
+    if(score < melhorScore){
+      melhorScore = score;
+      melhor = time;
+    }
+  }
+
+  // remove da fila
+  melhor.forEach(j=>{
+    fila.splice(fila.indexOf(j),1);
+  });
+
+  times.push(melhor);
+
+  balancearTimes(); // 🔥 troca inteligente
+}
+
+/* 🔁 TROCA INTELIGENTE */
+function balancearTimes(){
+  if(times.length < 2) return;
+
+  let melhorou = true;
+
+  while(melhorou){
+    melhorou = false;
+
+    for(let i=0;i<times.length;i++){
+      for(let j=i+1;j<times.length;j++){
+
+        let t1 = times[i];
+        let t2 = times[j];
+
+        let soma1 = soma(t1);
+        let soma2 = soma(t2);
+
+        // tenta trocar jogadores
+        for(let a=0;a<4;a++){
+          for(let b=0;b<4;b++){
+
+            if(t1[a].genero !== t2[b].genero) continue;
+
+            // troca
+            let temp = t1[a];
+            t1[a] = t2[b];
+            t2[b] = temp;
+
+            let novaDif = Math.abs(soma(t1) - soma(t2));
+            let antigaDif = Math.abs(soma1 - soma2);
+
+            if(novaDif < antigaDif){
+              melhorou = true;
+            } else {
+              // desfaz
+              temp = t1[a];
+              t1[a] = t2[b];
+              t2[b] = temp;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  renderTimes();
+}
+
+/* soma */
+function soma(time){
+  return time.reduce((a,j)=>a+j.nivel,0);
+}
+
+/* sorteio geral */
+function sortear(){
+  fila = [...jogadores];
+  times = [];
+
+  while(true){
+    let antes = times.length;
+    tentarFormarTimeBalanceado();
+    if(times.length === antes) break;
+  }
+
+  salvar();
+  renderTimes();
+  renderFila();
+}
+
+/* reset */
+function resetar(){
+  times = [];
+  fila = [...jogadores];
+  salvar();
+  renderTimes();
+  renderFila();
+}
+
+/* render */
+function renderLista(){
+  const ul = document.getElementById("lista");
+  ul.innerHTML="";
   jogadores.forEach((j,i)=>{
-    const li = document.createElement("li");
-    li.innerHTML = `${j.nome} (N${j.nivel})
-    <button onclick="removerJogador(${i})">❌</button>`;
-    lista.appendChild(li);
+    ul.innerHTML += `<li>${j.nome} (${j.genero} N${j.nivel})</li>`;
   });
 }
 
-// remover
-function removerJogador(i){
-  jogadores.splice(i,1);
-  atualizarLista();
-  salvarJogadores();
-}
-
-// reset
-function resetarTimes(){
-  timesSalvos = [];
-  localStorage.removeItem("times");
-
-  document.getElementById("times").innerHTML="";
-  document.getElementById("ranking").innerHTML="";
-}
-
-// sorteio
-function sortearTimes(){
-  let homens = jogadores.filter(j=>j.genero==="M");
-  let mulheres = jogadores.filter(j=>j.genero==="F");
-
-  let times = [];
-
-  homens.sort(()=>Math.random()-0.5);
-  mulheres.sort(()=>Math.random()-0.5);
-
-  while(homens.length || mulheres.length){
-    let time=[];
-
-    for(let i=0;i<2 && homens.length;i++) time.push(homens.pop());
-    for(let i=0;i<2 && mulheres.length;i++) time.push(mulheres.pop());
-
-    while(time.length<4 && (homens.length || mulheres.length)){
-      if(homens.length) time.push(homens.pop());
-      else time.push(mulheres.pop());
-    }
-
-    times.push(time);
-  }
-
-  timesSalvos = times;
-  salvarTimes();
-
-  mostrarTimes(times);
-  gerarRanking(times);
-}
-
-// mostrar
-function mostrarTimes(times){
+function renderTimes(){
   const div = document.getElementById("times");
   div.innerHTML="";
 
-  times.forEach((time,i)=>{
-    let html = `<div class="time"><h3>Time ${i+1}</h3>`;
-    time.forEach(j=>{
-      html += `<p>${j.nome} (N${j.nivel})</p>`;
+  times.forEach((t,i)=>{
+    let total = soma(t);
+
+    let html = `<div class="time"><h3>Time ${i+1} (${total})</h3>`;
+    t.forEach(j=>{
+      html += `<p>${j.nome} N${j.nivel}</p>`;
     });
-    html += `</div>`;
+    html += "</div>";
+
     div.innerHTML += html;
   });
 }
 
-// ranking
-function gerarRanking(times){
-  let ranking=[];
+function renderFila(){
+  const div = document.getElementById("fila");
 
-  times.forEach((time,i)=>{
-    let total = time.reduce((a,j)=>a+j.nivel,0);
-    ranking.push({time:i+1, pontos:total});
-  });
-
-  ranking.sort((a,b)=>b.pontos-a.pontos);
-
-  const div = document.getElementById("ranking");
-  div.innerHTML="<h3>Ranking</h3>";
-
-  ranking.forEach((r,i)=>{
-    div.innerHTML+=`<p>${i+1}º - Time ${r.time} (${r.pontos})</p>`;
+  div.innerHTML="<h3>Fila</h3>";
+  fila.forEach(j=>{
+    div.innerHTML += `<p>${j.nome} (${j.genero})</p>`;
   });
 }
 
-carregarDados();
+carregar();
 </script>
 
 </body>
