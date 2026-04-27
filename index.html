@@ -2,7 +2,7 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
-<title>M&M Vôlei PRO MAX</title>
+<title>M&M Vôlei PRO</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -10,10 +10,12 @@
 body{
   margin:0;
   font-family:Arial;
-  color:white;
   background:linear-gradient(135deg,#020617,#0f172a,#1e3a8a);
+  color:white;
+  text-align:center;
 }
 
+/* laterais */
 .lateral{
   position:fixed;
   top:0;
@@ -27,37 +29,31 @@ body{
   max-width:900px;
   margin:auto;
   padding:20px;
-  text-align:center;
   position:relative;
   z-index:1;
 }
 
 .card{
-  background:rgba(0,0,0,0.75);
+  background:rgba(0,0,0,0.7);
   padding:15px;
   border-radius:12px;
   margin-bottom:15px;
 }
 
-input,select,button{
-  margin:5px;
+button{
   padding:10px;
-  border-radius:8px;
+  margin:5px;
   border:none;
+  border-radius:8px;
+  cursor:pointer;
 }
 
-button{cursor:pointer;}
-
-.remove{
-  background:#ef4444;
-  color:white;
-  margin-left:10px;
-}
+.remove{background:red;color:white;}
 
 .time{
-  background:rgba(0,0,0,0.75);
-  padding:10px;
+  background:rgba(0,0,0,0.7);
   border-radius:10px;
+  padding:10px;
 }
 
 #times{
@@ -66,14 +62,7 @@ button{cursor:pointer;}
   gap:15px;
 }
 
-.fila{
-  margin-top:20px;
-  background:rgba(255,255,255,0.1);
-  padding:10px;
-  border-radius:10px;
-}
-
-h3{color:#facc15;}
+.hidden{display:none;}
 
 </style>
 </head>
@@ -85,13 +74,31 @@ h3{color:#facc15;}
 
 <div class="container">
 
-<h2>🏐 M&M VOLEI PRO MAX</h2>
+<!-- 🔐 LOGIN -->
+<div id="login">
 
-<div class="card">
+<h2>🏐 M&M VOLEI</h2>
+
+<button onclick="modoVisitante()">👤 Entrar como Visitante</button>
+<button onclick="abrirLogin()">👑 Administrador</button>
+
+<div id="senhaBox" class="hidden">
+<input type="password" id="senha" placeholder="Senha">
+<button onclick="loginAdm()">Entrar</button>
+</div>
+
+</div>
+
+<!-- APP -->
+<div id="app" class="hidden">
+
+<h2>🏐 M&M VOLEI PRO</h2>
+
+<div id="adminArea" class="card hidden">
 <input id="nome" placeholder="Nome">
 <select id="genero">
-<option value="M">Masculino</option>
-<option value="F">Feminino</option>
+<option value="M">M</option>
+<option value="F">F</option>
 </select>
 <select id="nivel">
 <option value="1">N1</option>
@@ -107,9 +114,11 @@ h3{color:#facc15;}
 <ul id="lista"></ul>
 </div>
 
-<button onclick="reorganizar()">🎮 Refazer Equilibrado</button>
+<div id="adminBtns" class="hidden">
+<button onclick="reorganizar()">🎮 Refazer</button>
 <button onclick="corrigirTimes()">🤖 Corrigir</button>
 <button onclick="resetar()">Resetar</button>
+</div>
 
 <div id="alerta"></div>
 <div id="sugestao"></div>
@@ -117,42 +126,76 @@ h3{color:#facc15;}
 <canvas id="grafico"></canvas>
 
 <div id="times"></div>
-<div id="fila" class="fila"></div>
+<div id="fila"></div>
+
+</div>
 
 </div>
 
 <script>
 
+let modo="visitante";
+
+function modoVisitante(){
+modo="visitante";
+entrarApp();
+}
+
+function abrirLogin(){
+document.getElementById("senhaBox").classList.remove("hidden");
+}
+
+function loginAdm(){
+let senha=document.getElementById("senha").value;
+if(senha==="147580"){
+modo="admin";
+entrarApp();
+}else{
+alert("Senha incorreta");
+}
+}
+
+function entrarApp(){
+document.getElementById("login").classList.add("hidden");
+document.getElementById("app").classList.remove("hidden");
+
+if(modo==="admin"){
+document.getElementById("adminArea").classList.remove("hidden");
+document.getElementById("adminBtns").classList.remove("hidden");
+}
+render();
+}
+
+/* dados */
 let jogadores=[];
 let fila=[];
 let times=[];
 
 function salvar(){
-localStorage.setItem("jogadores",JSON.stringify(jogadores));
-localStorage.setItem("fila",JSON.stringify(fila));
-localStorage.setItem("times",JSON.stringify(times));
+localStorage.setItem("dados",JSON.stringify({jogadores,fila,times}));
 }
 
 function carregar(){
-jogadores=JSON.parse(localStorage.getItem("jogadores")||"[]");
-fila=JSON.parse(localStorage.getItem("fila")||"[]");
-times=JSON.parse(localStorage.getItem("times")||"[]");
-render();
+let d=JSON.parse(localStorage.getItem("dados")||"{}");
+jogadores=d.jogadores||[];
+fila=d.fila||[];
+times=d.times||[];
 }
 
+/* adicionar */
 function add(){
-let nome=nomeInput();
+if(modo!=="admin") return;
+
+let nome=document.getElementById("nome").value.trim();
 let genero=document.getElementById("genero").value;
 let nivel=parseInt(document.getElementById("nivel").value);
-
-if(!nome)return alert("Digite nome");
 
 let j={nome,genero,nivel};
 
 jogadores.push(j);
 fila.push(j);
 
-balanceamentoGlobal();
+balancear();
 
 salvar();
 render();
@@ -160,204 +203,42 @@ render();
 document.getElementById("nome").value="";
 }
 
-function nomeInput(){
-return document.getElementById("nome").value.trim();
-}
-
+/* remover */
 function removerJogador(nome){
+if(modo!=="admin") return;
 
 jogadores=jogadores.filter(j=>j.nome!==nome);
 fila=fila.filter(j=>j.nome!==nome);
-
 times.forEach(t=>{
-for(let i=t.length-1;i>=0;i--){
-if(t[i].nome===nome) t.splice(i,1);
-}
+t=t.filter(j=>j.nome!==nome);
 });
 
-balanceamentoGlobal();
+balancear();
 
 salvar();
 render();
 }
 
-function balanceamentoGlobal(){
+/* balanceamento */
+function balancear(){
 
 let pool=[...fila,...times.flat()];
 times=[];
 fila=[];
 
-let homens=pool.filter(j=>j.genero==="M");
-let mulheres=pool.filter(j=>j.genero==="F");
+let h=pool.filter(j=>j.genero==="M");
+let m=pool.filter(j=>j.genero==="F");
 
-homens.sort((a,b)=>b.nivel-a.nivel);
-mulheres.sort((a,b)=>b.nivel-a.nivel);
-
-while(homens.length>=2 && mulheres.length>=2){
-
-let time=[
-homens.shift(),
-homens.pop(),
-mulheres.shift(),
-mulheres.pop()
-];
-
-times.push(time);
+while(h.length>=2 && m.length>=2){
+times.push([h.pop(),h.pop(),m.pop(),m.pop()]);
 }
 
-fila=[...homens,...mulheres];
-
-trocaInteligente();
-validarTimes();
+fila=[...h,...m];
 }
 
-function trocaInteligente(){
-
-if(times.length<2)return;
-
-let melhorou=true;
-
-while(melhorou){
-melhorou=false;
-
-for(let i=0;i<times.length;i++){
-for(let j=i+1;j<times.length;j++){
-
-let t1=times[i];
-let t2=times[j];
-
-for(let a=0;a<t1.length;a++){
-for(let b=0;b<t2.length;b++){
-
-if(t1[a].genero!==t2[b].genero)continue;
-
-let before=Math.abs(soma(t1)-soma(t2));
-
-[t1[a],t2[b]]=[t2[b],t1[a]];
-
-let after=Math.abs(soma(t1)-soma(t2));
-
-if(after<before){
-melhorou=true;
-}else{
-[t1[a],t2[b]]=[t2[b],t1[a]];
-}
-
-}
-}
-}
-}
-}
-}
-
-function validarTimes(){
-
-times.forEach(time=>{
-
-let homens=time.filter(j=>j.genero==="M");
-let mulheres=time.filter(j=>j.genero==="F");
-
-while(homens.length>2){
-let r=homens.pop();
-time.splice(time.indexOf(r),1);
-fila.push(r);
-homens=time.filter(j=>j.genero==="M");
-}
-
-while(mulheres.length>2){
-let r=mulheres.pop();
-time.splice(time.indexOf(r),1);
-fila.push(r);
-mulheres=time.filter(j=>j.genero==="F");
-}
-
-});
-}
-
+/* soma */
 function soma(t){
 return t.reduce((a,j)=>a+j.nivel,0);
-}
-
-function reorganizar(){
-balanceamentoGlobal();
-salvar();
-render();
-}
-
-function resetar(){
-times=[];
-fila=[...jogadores];
-salvar();
-render();
-}
-
-/* 🎯 sugestão */
-function sugerirTroca(){
-
-let melhor=null;
-let ganhoMax=0;
-
-for(let i=0;i<times.length;i++){
-for(let j=i+1;j<times.length;j++){
-
-let t1=times[i];
-let t2=times[j];
-
-for(let a=0;a<t1.length;a++){
-for(let b=0;b<t2.length;b++){
-
-if(t1[a].genero!==t2[b].genero)continue;
-
-let before=Math.abs(soma(t1)-soma(t2));
-
-[t1[a],t2[b]]=[t2[b],t1[a]];
-
-let after=Math.abs(soma(t1)-soma(t2));
-
-[t1[a],t2[b]]=[t2[b],t1[a]];
-
-let ganho=before-after;
-
-if(ganho>ganhoMax){
-ganhoMax=ganho;
-melhor={i,j,a,b};
-}
-
-}
-}
-}
-}
-
-if(!melhor){
-document.getElementById("sugestao").innerHTML="✅ Já equilibrado";
-return null;
-}
-
-let t1=times[melhor.i];
-let t2=times[melhor.j];
-
-document.getElementById("sugestao").innerHTML=
-`🎯 Trocar ${t1[melhor.a].nome} por ${t2[melhor.b].nome}`;
-
-return melhor;
-}
-
-/* 🤖 corrigir */
-function corrigirTimes(){
-
-let troca=sugerirTroca();
-if(!troca)return;
-
-let t1=times[troca.i];
-let t2=times[troca.j];
-
-[t1[troca.a],t2[troca.b]]=[t2[troca.b],t1[troca.a]];
-
-validarTimes();
-trocaInteligente();
-
-salvar();
-render();
 }
 
 /* render */
@@ -365,59 +246,37 @@ function render(){
 
 let ul=document.getElementById("lista");
 ul.innerHTML="";
+
 jogadores.forEach(j=>{
-ul.innerHTML+=`<li>${j.nome} (${j.genero} N${j.nivel})
-<button class="remove" onclick="removerJogador('${j.nome}')">❌</button>
+ul.innerHTML+=`
+<li>
+${j.nome} (${j.genero} N${j.nivel})
+${modo==="admin" ? `<button class="remove" onclick="removerJogador('${j.nome}')">❌</button>` : ""}
 </li>`;
 });
-
-let niveis=times.map(t=>soma(t));
-let diff=Math.max(...niveis,0)-Math.min(...niveis,0);
-
-let alerta=document.getElementById("alerta");
-
-if(diff<=2){
-alerta.innerHTML="✅ Equilibrado";
-alerta.style.color="#22c55e";
-}else if(diff<=5){
-alerta.innerHTML="⚠️ Médio";
-alerta.style.color="#facc15";
-}else{
-alerta.innerHTML="🚨 Desbalanceado";
-alerta.style.color="#ef4444";
-}
 
 let div=document.getElementById("times");
 div.innerHTML="";
 
 times.forEach((t,i)=>{
-
-let total=soma(t);
-let media=(total/t.length).toFixed(1);
-
-let cor = diff<=2 ? "#22c55e" : diff<=5 ? "#facc15" : "#ef4444";
-
-let html=`<div class="time" style="border:3px solid ${cor}">
-<h3>🏐 Time ${i+1}</h3>
-<p>🔥 Nível ${total} | Média ${media}</p>`;
-
-t.forEach(j=>html+=`<p>${j.nome} (N${j.nivel})</p>`);
-
-html+="</div>";
-
-div.innerHTML+=html;
+div.innerHTML+=`
+<div class="time">
+<h3>Time ${i+1} (${soma(t)})</h3>
+${t.map(j=>`<p>${j.nome}</p>`).join("")}
+</div>`;
 });
 
 let f=document.getElementById("fila");
 f.innerHTML="<h3>Fila</h3>";
-fila.forEach(j=>f.innerHTML+=`<p>${j.nome}</p>`);
+fila.forEach(j=>{
+f.innerHTML+=`<p>${j.nome}</p>`;
+});
 
 grafico();
-sugerirTroca();
 }
 
+/* gráfico */
 function grafico(){
-
 let ctx=document.getElementById("grafico");
 let dados=times.map(t=>soma(t));
 
@@ -427,10 +286,15 @@ window.grafico=new Chart(ctx,{
 type:'bar',
 data:{
 labels:times.map((_,i)=>"Time "+(i+1)),
-datasets:[{label:"Força",data:dados}]
+datasets:[{data:dados}]
 }
 });
 }
+
+/* botões */
+function reorganizar(){balancear();salvar();render();}
+function corrigirTimes(){balancear();salvar();render();}
+function resetar(){times=[];fila=[...jogadores];salvar();render();}
 
 carregar();
 
