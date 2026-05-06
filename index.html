@@ -20,7 +20,7 @@ text-align:center;
 overflow-x:hidden;
 }
 
-/* laterais */
+/* imagens laterais */
 .lateral{
 position:fixed;
 top:0;
@@ -51,7 +51,7 @@ z-index:1;
 
 /* cards */
 .card{
-background:rgba(0,0,0,0.72);
+background:rgba(0,0,0,0.75);
 padding:20px;
 border-radius:16px;
 margin-bottom:20px;
@@ -59,7 +59,7 @@ backdrop-filter:blur(8px);
 box-shadow:0 0 20px rgba(0,0,0,0.35);
 }
 
-/* titulo */
+/* titulos */
 h2,h3{
 margin-top:0;
 }
@@ -95,7 +95,7 @@ background:#ff1e1e;
 color:white;
 }
 
-/* grid times */
+/* grid */
 #times{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
@@ -105,7 +105,7 @@ margin-top:20px;
 
 /* card time */
 .time{
-background:rgba(0,0,0,0.75);
+background:rgba(0,0,0,0.78);
 border-radius:16px;
 padding:15px;
 box-shadow:0 0 15px rgba(0,0,0,0.35);
@@ -134,7 +134,7 @@ margin:10px 0;
 /* fila */
 #fila{
 margin-top:30px;
-background:rgba(0,0,0,0.72);
+background:rgba(0,0,0,0.75);
 padding:20px;
 border-radius:16px;
 }
@@ -144,6 +144,7 @@ border-radius:16px;
 display:none;
 }
 
+/* gráfico */
 #grafico{
 margin-top:30px;
 margin-bottom:30px;
@@ -176,7 +177,7 @@ box-sizing:border-box;
 
 <body>
 
-<!-- imagens laterais -->
+<!-- imagens -->
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
 
@@ -258,8 +259,8 @@ Entrar
 🎮 Refazer
 </button>
 
-<button onclick="resetar()">
-♻️ Resetar
+<button onclick="resetarTimes()">
+♻️ Resetar Times
 </button>
 
 </div>
@@ -290,7 +291,7 @@ let jogadores=[];
 let fila=[];
 let times=[];
 
-/* carregar dados */
+/* carregar */
 function carregar(){
 
 let dados=JSON.parse(
@@ -383,7 +384,7 @@ render();
 
 }
 
-/* adicionar jogador */
+/* adicionar */
 function add(){
 
 if(modo!=="admin") return;
@@ -409,7 +410,7 @@ return;
 
 }
 
-/* impedir repetido */
+/* repetido */
 let existe=jogadores.some(
 j=>j.nome.toLowerCase()===nome.toLowerCase()
 );
@@ -429,10 +430,8 @@ nivel
 
 jogadores.push(jogador);
 
-/* salva */
 salvar();
 
-/* render */
 render();
 
 /* limpa */
@@ -481,24 +480,23 @@ return t.reduce(
 
 }
 
-/* sorteio */
+/* sorteio inteligente */
 function sortearTimes(){
 
-/* limpa */
 times=[];
 fila=[];
 
 /* separa */
-let homens=jogadores
+let homens=[...jogadores]
 .filter(j=>j.genero==="M")
 .sort((a,b)=>b.nivel-a.nivel);
 
-let mulheres=jogadores
+let mulheres=[...jogadores]
 .filter(j=>j.genero==="F")
 .sort((a,b)=>b.nivel-a.nivel);
 
-/* qtd de times */
-let qtd=Math.floor(
+/* qtd maxima */
+let qtdTimes=Math.floor(
 Math.min(
 homens.length/2,
 mulheres.length/2
@@ -506,43 +504,35 @@ mulheres.length/2
 );
 
 /* cria times */
-for(let i=0;i<qtd;i++){
+for(let i=0;i<qtdTimes;i++){
 
 times.push([]);
 
 }
 
-/* distribuir equilibrado */
-function distribuir(lista){
+/* distribuir */
+function encaixarJogador(jogador,genero){
 
-let indice=0;
-let direcao=1;
+let melhorTime=null;
+let menorNivel=999;
 
-lista.forEach(j=>{
+times.forEach(t=>{
 
-if(times.length===0) return;
+let qtd=t.filter(
+j=>j.genero===genero
+).length;
 
-times[indice].push(j);
+let total=soma(t);
 
-if(direcao===1){
+if(
+qtd<2 &&
+(total+jogador.nivel)<=12
+){
 
-indice++;
+if(total<menorNivel){
 
-if(indice>=times.length){
-
-indice=times.length-1;
-direcao=-1;
-
-}
-
-}else{
-
-indice--;
-
-if(indice<0){
-
-indice=0;
-direcao=1;
+menorNivel=total;
+melhorTime=t;
 
 }
 
@@ -550,21 +540,52 @@ direcao=1;
 
 });
 
+if(melhorTime){
+
+melhorTime.push(jogador);
+
+}else{
+
+fila.push(jogador);
+
 }
 
-/* distribui */
-distribuir(homens);
-distribuir(mulheres);
+}
 
-/* deixa apenas times completos */
+/* homens */
+homens.forEach(j=>{
+
+encaixarJogador(j,"M");
+
+});
+
+/* mulheres */
+mulheres.forEach(j=>{
+
+encaixarJogador(j,"F");
+
+});
+
+/* validar times */
 let completos=[];
 
 times.forEach(t=>{
 
-let h=t.filter(j=>j.genero==="M").length;
-let m=t.filter(j=>j.genero==="F").length;
+let h=t.filter(
+j=>j.genero==="M"
+).length;
 
-if(h===2 && m===2){
+let m=t.filter(
+j=>j.genero==="F"
+).length;
+
+let total=soma(t);
+
+if(
+h===2 &&
+m===2 &&
+total<=12
+){
 
 completos.push(t);
 
@@ -578,36 +599,28 @@ fila.push(...t);
 
 times=completos;
 
-/* jogadores sobrando */
-let usados=times.flat();
+/* remove duplicados */
+fila=fila.filter((j,index,self)=>
+index===self.findIndex(
+a=>a.nome===j.nome
+)
+);
 
-jogadores.forEach(j=>{
-
-if(!usados.includes(j) && !fila.includes(j)){
-
-fila.push(j);
-
-}
-
-});
-
-/* salvar */
 salvar();
 
-/* render */
 render();
 
 }
 
-/* reorganizar */
+/* refazer */
 function reorganizar(){
 
 sortearTimes();
 
 }
 
-/* reset */
-function resetar(){
+/* reset apenas times */
+function resetarTimes(){
 
 times=[];
 fila=[];
@@ -655,9 +668,15 @@ div.innerHTML="";
 if(times.length===0){
 
 div.innerHTML=`
+
 <div class="card">
-<h3>Nenhum time sorteado</h3>
+
+<h3>
+Nenhum time sorteado
+</h3>
+
 </div>
+
 `;
 
 }else{
@@ -674,7 +693,7 @@ div.innerHTML+=`
 
 <p>
 ⭐ Nível Total:
-<b>${soma(t)}</b>
+<b>${soma(t)}</b>/12
 </p>
 
 <hr>
@@ -704,9 +723,11 @@ f.innerHTML="<h3>Fila</h3>";
 if(fila.length===0){
 
 f.innerHTML+=`
+
 <p>
 Nenhum atleta na fila
 </p>
+
 `;
 
 }else{
@@ -724,51 +745,52 @@ ${j.nome}
 
 });
 
-/* sugestão */
-let homens=fila.filter(j=>j.genero==="M").length;
-let mulheres=fila.filter(j=>j.genero==="F").length;
+let homensFila=fila.filter(
+j=>j.genero==="M"
+).length;
+
+let mulheresFila=fila.filter(
+j=>j.genero==="F"
+).length;
 
 f.innerHTML+=`<hr>`;
 
-if(homens>womenCount()){
+if(homensFila>mulheresFila){
 
 f.innerHTML+=`
+
 <p>
 ⚠️ Falta cadastrar atletas Femininas para completar novos times.
 </p>
+
 `;
 
-}else if(mulheres>homens){
+}else if(mulheresFila>homensFila){
 
 f.innerHTML+=`
+
 <p>
 ⚠️ Falta cadastrar atletas Masculinos para completar novos times.
 </p>
+
 `;
 
 }else{
 
 f.innerHTML+=`
+
 <p>
 ⚠️ Cadastre mais atletas para completar novos times.
 </p>
+
 `;
 
 }
 
 }
 
-/* gráfico */
+/* grafico */
 grafico();
-
-}
-
-/* contador mulheres */
-function womenCount(){
-
-return fila.filter(
-j=>j.genero==="F"
-).length;
 
 }
 
@@ -834,6 +856,7 @@ color:'white'
 
 y:{
 beginAtZero:true,
+max:12,
 ticks:{
 color:'white'
 }
