@@ -2,6 +2,7 @@
 <html lang="pt-br">
 
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
@@ -20,7 +21,7 @@ text-align:center;
 overflow-x:hidden;
 }
 
-/* imagens laterais */
+/* laterais */
 .lateral{
 position:fixed;
 top:0;
@@ -57,11 +58,6 @@ border-radius:16px;
 margin-bottom:20px;
 backdrop-filter:blur(8px);
 box-shadow:0 0 20px rgba(0,0,0,0.35);
-}
-
-/* titulos */
-h2,h3{
-margin-top:0;
 }
 
 /* inputs */
@@ -103,7 +99,7 @@ gap:20px;
 margin-top:20px;
 }
 
-/* card time */
+/* time */
 .time{
 background:rgba(0,0,0,0.78);
 border-radius:16px;
@@ -173,11 +169,11 @@ box-sizing:border-box;
 }
 
 </style>
+
 </head>
 
 <body>
 
-<!-- imagens -->
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
 
@@ -248,7 +244,7 @@ Entrar
 
 </div>
 
-<!-- BOTOES -->
+<!-- BOTÕES -->
 <div id="adminBtns" class="hidden">
 
 <button onclick="sortearTimes()">
@@ -278,7 +274,33 @@ Entrar
 
 </div>
 
-<script>
+<!-- FIREBASE -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+doc,
+setDoc,
+getDoc,
+onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* firebase */
+const firebaseConfig = {
+apiKey: "AIzaSyDNBTUXydUU8gxdteO4_dwQn65WpLGoRV4",
+authDomain: "sorteio-de-times-aleatorios.firebaseapp.com",
+projectId: "sorteio-de-times-aleatorios",
+storageBucket: "sorteio-de-times-aleatorios.firebasestorage.app",
+messagingSenderId: "169025334598",
+appId: "1:169025334598:web:dcae7c136755b4f0d80947",
+measurementId: "G-HC4H5DK7DD"
+};
+
+const appFirebase=initializeApp(firebaseConfig);
+
+const db=getFirestore(appFirebase);
 
 /* senha */
 const SENHA="147580";
@@ -291,35 +313,39 @@ let jogadores=[];
 let fila=[];
 let times=[];
 
-/* carregar */
-function carregar(){
+/* referência */
+const ref=doc(db,"app","dados");
 
-let dados=JSON.parse(
-localStorage.getItem("dadosMM") || "{}"
-);
+/* sincronização tempo real */
+onSnapshot(ref,(snapshot)=>{
+
+if(snapshot.exists()){
+
+const dados=snapshot.data();
 
 jogadores=dados.jogadores || [];
 fila=dados.fila || [];
 times=dados.times || [];
 
+render();
+
 }
 
-/* salvar */
-function salvar(){
+});
 
-localStorage.setItem(
-"dadosMM",
-JSON.stringify({
+/* salvar */
+async function salvar(){
+
+await setDoc(ref,{
 jogadores,
 fila,
 times
-})
-);
+});
 
 }
 
 /* visitante */
-function modoVisitante(){
+window.modoVisitante=function(){
 
 modo="visitante";
 
@@ -328,7 +354,7 @@ entrarApp();
 }
 
 /* abrir login */
-function abrirLogin(){
+window.abrirLogin=function(){
 
 document
 .getElementById("senhaBox")
@@ -337,7 +363,7 @@ document
 }
 
 /* login */
-function loginAdm(){
+window.loginAdm=function(){
 
 let senha=document
 .getElementById("senha")
@@ -385,7 +411,7 @@ render();
 }
 
 /* adicionar */
-function add(){
+window.add=async function(){
 
 if(modo!=="admin") return;
 
@@ -402,7 +428,6 @@ let nivel=parseInt(
 document.getElementById("nivel").value
 );
 
-/* validação */
 if(nome===""){
 
 alert("Digite um nome");
@@ -410,7 +435,6 @@ return;
 
 }
 
-/* repetido */
 let existe=jogadores.some(
 j=>j.nome.toLowerCase()===nome.toLowerCase()
 );
@@ -430,7 +454,7 @@ nivel
 
 jogadores.push(jogador);
 
-salvar();
+await salvar();
 
 render();
 
@@ -444,7 +468,7 @@ document.getElementById("nivel").value="1";
 }
 
 /* remover */
-function removerJogador(nome){
+window.removerJogador=async function(nome){
 
 if(modo!=="admin") return;
 
@@ -464,13 +488,13 @@ times=times.filter(
 t=>t.length>0
 );
 
-salvar();
+await salvar();
 
 render();
 
 }
 
-/* soma nivel */
+/* soma */
 function soma(t){
 
 return t.reduce(
@@ -480,8 +504,8 @@ return t.reduce(
 
 }
 
-/* sorteio inteligente */
-function sortearTimes(){
+/* sorteio */
+window.sortearTimes=async function(){
 
 times=[];
 fila=[];
@@ -495,7 +519,7 @@ let mulheres=[...jogadores]
 .filter(j=>j.genero==="F")
 .sort((a,b)=>b.nivel-a.nivel);
 
-/* qtd maxima */
+/* qtd */
 let qtdTimes=Math.floor(
 Math.min(
 homens.length/2,
@@ -503,17 +527,17 @@ mulheres.length/2
 )
 );
 
-/* cria times */
+/* cria */
 for(let i=0;i<qtdTimes;i++){
 
 times.push([]);
 
 }
 
-/* distribuir */
-function encaixarJogador(jogador,genero){
+/* encaixe */
+function encaixar(jogador,genero){
 
-let melhorTime=null;
+let melhor=null;
 let menorNivel=999;
 
 times.forEach(t=>{
@@ -532,7 +556,7 @@ qtd<2 &&
 if(total<menorNivel){
 
 menorNivel=total;
-melhorTime=t;
+melhor=t;
 
 }
 
@@ -540,9 +564,9 @@ melhorTime=t;
 
 });
 
-if(melhorTime){
+if(melhor){
 
-melhorTime.push(jogador);
+melhor.push(jogador);
 
 }else{
 
@@ -552,21 +576,16 @@ fila.push(jogador);
 
 }
 
-/* homens */
+/* distribui */
 homens.forEach(j=>{
-
-encaixarJogador(j,"M");
-
+encaixar(j,"M");
 });
 
-/* mulheres */
 mulheres.forEach(j=>{
-
-encaixarJogador(j,"F");
-
+encaixar(j,"F");
 });
 
-/* validar times */
+/* validar */
 let completos=[];
 
 times.forEach(t=>{
@@ -599,33 +618,33 @@ fila.push(...t);
 
 times=completos;
 
-/* remove duplicados */
+/* remover duplicados */
 fila=fila.filter((j,index,self)=>
 index===self.findIndex(
 a=>a.nome===j.nome
 )
 );
 
-salvar();
+await salvar();
 
 render();
 
 }
 
 /* refazer */
-function reorganizar(){
+window.reorganizar=function(){
 
 sortearTimes();
 
 }
 
-/* reset apenas times */
-function resetarTimes(){
+/* reset */
+window.resetarTimes=async function(){
 
 times=[];
 fila=[];
 
-salvar();
+await salvar();
 
 render();
 
@@ -745,51 +764,9 @@ ${j.nome}
 
 });
 
-let homensFila=fila.filter(
-j=>j.genero==="M"
-).length;
-
-let mulheresFila=fila.filter(
-j=>j.genero==="F"
-).length;
-
-f.innerHTML+=`<hr>`;
-
-if(homensFila>mulheresFila){
-
-f.innerHTML+=`
-
-<p>
-⚠️ Falta cadastrar atletas Femininas para completar novos times.
-</p>
-
-`;
-
-}else if(mulheresFila>homensFila){
-
-f.innerHTML+=`
-
-<p>
-⚠️ Falta cadastrar atletas Masculinos para completar novos times.
-</p>
-
-`;
-
-}else{
-
-f.innerHTML+=`
-
-<p>
-⚠️ Cadastre mais atletas para completar novos times.
-</p>
-
-`;
-
 }
 
-}
-
-/* grafico */
+/* gráfico */
 grafico();
 
 }
@@ -869,9 +846,6 @@ color:'white'
 });
 
 }
-
-/* iniciar */
-carregar();
 
 </script>
 
