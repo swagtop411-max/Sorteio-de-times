@@ -2,11 +2,14 @@
 <html lang="pt-br">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>M&M Vôlei PRO</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
+
 body{
   margin:0;
   font-family:Arial;
@@ -21,7 +24,11 @@ body{
   top:0;
   height:100%;
   z-index:0;
+  width:120px;
+  object-fit:cover;
+  opacity:0.25;
 }
+
 .left{left:0;}
 .right{right:0;}
 
@@ -46,9 +53,17 @@ button{
   border:none;
   border-radius:8px;
   cursor:pointer;
+  font-weight:bold;
 }
 
-.remove{background:red;color:white;}
+button:hover{
+  opacity:0.9;
+}
+
+.remove{
+  background:red;
+  color:white;
+}
 
 .time{
   background:rgba(0,0,0,0.7);
@@ -62,7 +77,47 @@ button{
   gap:15px;
 }
 
-.hidden{display:none;}
+.hidden{
+  display:none;
+}
+
+input,select{
+  padding:10px;
+  border-radius:8px;
+  border:none;
+  margin:5px;
+}
+
+li{
+  list-style:none;
+  margin:8px 0;
+}
+
+#grafico{
+  margin-top:20px;
+  margin-bottom:20px;
+}
+
+@media(max-width:768px){
+
+.lateral{
+display:none;
+}
+
+.container{
+padding:10px;
+}
+
+button{
+width:100%;
+}
+
+input,select{
+width:100%;
+margin-bottom:10px;
+}
+
+}
 
 </style>
 </head>
@@ -74,17 +129,21 @@ button{
 
 <div class="container">
 
-<!-- 🔐 LOGIN -->
+<!-- LOGIN -->
 <div id="login">
 
 <h2>🏐 M&M VOLEI</h2>
 
 <button onclick="modoVisitante()">👤 Entrar como Visitante</button>
+
 <button onclick="abrirLogin()">👑 Administrador</button>
 
 <div id="senhaBox" class="hidden">
+
 <input type="password" id="senha" placeholder="Senha">
+
 <button onclick="loginAdm()">Entrar</button>
+
 </div>
 
 </div>
@@ -94,12 +153,16 @@ button{
 
 <h2>🏐 M&M VOLEI PRO</h2>
 
+<!-- AREA ADMIN -->
 <div id="adminArea" class="card hidden">
-<input id="nome" placeholder="Nome">
+
+<input id="nome" placeholder="Nome do jogador">
+
 <select id="genero">
-<option value="M">M</option>
-<option value="F">F</option>
+<option value="M">Masculino</option>
+<option value="F">Feminino</option>
 </select>
+
 <select id="nivel">
 <option value="1">N1</option>
 <option value="2">N2</option>
@@ -107,25 +170,42 @@ button{
 <option value="4">N4</option>
 <option value="5">N5</option>
 </select>
+
 <button onclick="add()">Adicionar</button>
+
 </div>
 
+<!-- LISTA -->
 <div class="card">
+
+<h3>Jogadores</h3>
+
 <ul id="lista"></ul>
+
 </div>
 
+<!-- BOTOES -->
 <div id="adminBtns" class="hidden">
+
 <button onclick="reorganizar()">🎮 Refazer</button>
+
 <button onclick="corrigirTimes()">🤖 Corrigir</button>
-<button onclick="resetar()">Resetar</button>
+
+<button onclick="resetar()">♻️ Resetar</button>
+
 </div>
 
 <div id="alerta"></div>
+
 <div id="sugestao"></div>
 
+<!-- GRAFICO -->
 <canvas id="grafico"></canvas>
 
+<!-- TIMES -->
 <div id="times"></div>
+
+<!-- FILA -->
 <div id="fila"></div>
 
 </div>
@@ -134,168 +214,485 @@ button{
 
 <script>
 
+/* senha */
+const SENHA="147580";
+
+/* modo */
 let modo="visitante";
-
-function modoVisitante(){
-modo="visitante";
-entrarApp();
-}
-
-function abrirLogin(){
-document.getElementById("senhaBox").classList.remove("hidden");
-}
-
-function loginAdm(){
-let senha=document.getElementById("senha").value;
-if(senha==="147580"){
-modo="admin";
-entrarApp();
-}else{
-alert("Senha incorreta");
-}
-}
-
-function entrarApp(){
-document.getElementById("login").classList.add("hidden");
-document.getElementById("app").classList.remove("hidden");
-
-if(modo==="admin"){
-document.getElementById("adminArea").classList.remove("hidden");
-document.getElementById("adminBtns").classList.remove("hidden");
-}
-render();
-}
 
 /* dados */
 let jogadores=[];
 let fila=[];
 let times=[];
 
-function salvar(){
-localStorage.setItem("dados",JSON.stringify({jogadores,fila,times}));
+/* visitante */
+function modoVisitante(){
+modo="visitante";
+entrarApp();
 }
 
+/* abrir login */
+function abrirLogin(){
+document.getElementById("senhaBox")
+.classList.remove("hidden");
+}
+
+/* login */
+function loginAdm(){
+
+let senha=document
+.getElementById("senha")
+.value;
+
+if(senha===SENHA){
+
+modo="admin";
+
+entrarApp();
+
+}else{
+
+alert("Senha incorreta");
+
+}
+
+}
+
+/* entrar */
+function entrarApp(){
+
+document.getElementById("login")
+.classList.add("hidden");
+
+document.getElementById("app")
+.classList.remove("hidden");
+
+if(modo==="admin"){
+
+document.getElementById("adminArea")
+.classList.remove("hidden");
+
+document.getElementById("adminBtns")
+.classList.remove("hidden");
+
+}
+
+render();
+
+}
+
+/* salvar */
+function salvar(){
+
+localStorage.setItem(
+"dados",
+JSON.stringify({
+jogadores,
+fila,
+times
+})
+);
+
+}
+
+/* carregar */
 function carregar(){
-let d=JSON.parse(localStorage.getItem("dados")||"{}");
+
+let d=JSON.parse(
+localStorage.getItem("dados")||"{}"
+);
+
 jogadores=d.jogadores||[];
 fila=d.fila||[];
 times=d.times||[];
+
 }
 
-/* adicionar */
+/* adicionar jogador */
 function add(){
+
 if(modo!=="admin") return;
 
-let nome=document.getElementById("nome").value.trim();
-let genero=document.getElementById("genero").value;
-let nivel=parseInt(document.getElementById("nivel").value);
+let nome=document
+.getElementById("nome")
+.value
+.trim();
 
-let j={nome,genero,nivel};
+let genero=document
+.getElementById("genero")
+.value;
+
+let nivel=parseInt(
+document.getElementById("nivel").value
+);
+
+/* valida nome */
+if(nome===""){
+
+alert("Digite um nome");
+
+return;
+
+}
+
+/* evitar repetidos */
+let existe=jogadores.some(
+j=>j.nome.toLowerCase()===nome.toLowerCase()
+);
+
+if(existe){
+
+alert("Jogador já cadastrado");
+
+return;
+
+}
+
+let j={
+nome,
+genero,
+nivel
+};
 
 jogadores.push(j);
+
 fila.push(j);
 
 balancear();
 
 salvar();
+
 render();
 
+/* limpar */
 document.getElementById("nome").value="";
+document.getElementById("nome").focus();
+
+document.getElementById("genero").value="M";
+
+document.getElementById("nivel").value="1";
+
 }
 
 /* remover */
 function removerJogador(nome){
+
 if(modo!=="admin") return;
 
-jogadores=jogadores.filter(j=>j.nome!==nome);
-fila=fila.filter(j=>j.nome!==nome);
-times.forEach(t=>{
-t=t.filter(j=>j.nome!==nome);
-});
+jogadores=jogadores.filter(
+j=>j.nome!==nome
+);
+
+fila=fila.filter(
+j=>j.nome!==nome
+);
+
+times=times.map(t=>
+t.filter(j=>j.nome!==nome)
+);
+
+times=times.filter(
+t=>t.length>0
+);
 
 balancear();
 
 salvar();
+
 render();
+
 }
 
-/* balanceamento */
+/* balanceamento inteligente */
 function balancear(){
 
-let pool=[...fila,...times.flat()];
+let pool=[
+...fila,
+...times.flat()
+];
+
+/* reset */
 times=[];
 fila=[];
 
-let h=pool.filter(j=>j.genero==="M");
-let m=pool.filter(j=>j.genero==="F");
+/* separar */
+let homens=pool
+.filter(j=>j.genero==="M")
+.sort((a,b)=>b.nivel-a.nivel);
 
-while(h.length>=2 && m.length>=2){
-times.push([h.pop(),h.pop(),m.pop(),m.pop()]);
+let mulheres=pool
+.filter(j=>j.genero==="F")
+.sort((a,b)=>b.nivel-a.nivel);
+
+/* qtd times */
+let qtd=Math.floor(
+Math.min(
+homens.length/2,
+mulheres.length/2
+)
+);
+
+/* cria times */
+for(let i=0;i<qtd;i++){
+
+times.push([]);
+
 }
 
-fila=[...h,...m];
+/* distribuir */
+function distribuir(lista){
+
+let direcao=1;
+let indice=0;
+
+lista.forEach(j=>{
+
+times[indice].push(j);
+
+if(direcao===1){
+
+indice++;
+
+if(indice>=times.length){
+
+indice=times.length-1;
+
+direcao=-1;
+
 }
 
-/* soma */
+}else{
+
+indice--;
+
+if(indice<0){
+
+indice=0;
+
+direcao=1;
+
+}
+
+}
+
+});
+
+}
+
+/* distribuição */
+distribuir(homens);
+distribuir(mulheres);
+
+/* fila */
+let usados=times.flat();
+
+fila=pool.filter(
+j=>!usados.includes(j)
+);
+
+}
+
+/* soma nivel */
 function soma(t){
-return t.reduce((a,j)=>a+j.nivel,0);
+
+return t.reduce(
+(a,j)=>a+j.nivel,
+0
+);
+
 }
 
 /* render */
 function render(){
 
+/* lista */
 let ul=document.getElementById("lista");
+
 ul.innerHTML="";
 
 jogadores.forEach(j=>{
+
 ul.innerHTML+=`
 <li>
+
 ${j.nome} (${j.genero} N${j.nivel})
-${modo==="admin" ? `<button class="remove" onclick="removerJogador('${j.nome}')">❌</button>` : ""}
-</li>`;
+
+${modo==="admin"
+?
+`<button class="remove" onclick="removerJogador('${j.nome}')">❌</button>`
+:
+""
+}
+
+</li>
+`;
+
 });
 
+/* times */
 let div=document.getElementById("times");
+
 div.innerHTML="";
 
 times.forEach((t,i)=>{
+
 div.innerHTML+=`
+
 <div class="time">
-<h3>Time ${i+1} (${soma(t)})</h3>
-${t.map(j=>`<p>${j.nome}</p>`).join("")}
-</div>`;
+
+<h3>
+Time ${i+1} (${soma(t)})
+</h3>
+
+${t.map(j=>`
+<p>
+${j.nome} - N${j.nivel}
+</p>
+`).join("")}
+
+</div>
+
+`;
+
 });
 
+/* fila */
 let f=document.getElementById("fila");
+
 f.innerHTML="<h3>Fila</h3>";
+
+if(fila.length===0){
+
+f.innerHTML+="<p>Nenhum jogador na fila</p>";
+
+}else{
+
 fila.forEach(j=>{
-f.innerHTML+=`<p>${j.nome}</p>`;
+
+f.innerHTML+=`
+<p>
+${j.nome} (${j.genero} N${j.nivel})
+</p>
+`;
+
 });
 
-grafico();
 }
 
 /* gráfico */
+grafico();
+
+}
+
+/* grafico */
 function grafico(){
-let ctx=document.getElementById("grafico");
+
+let ctx=document
+.getElementById("grafico");
+
 let dados=times.map(t=>soma(t));
 
-if(window.grafico)window.grafico.destroy();
+if(window.graficoObj){
 
-window.grafico=new Chart(ctx,{
+window.graficoObj.destroy();
+
+}
+
+window.graficoObj=new Chart(ctx,{
+
 type:'bar',
+
 data:{
-labels:times.map((_,i)=>"Time "+(i+1)),
-datasets:[{data:dados}]
+
+labels:times.map(
+(_,i)=>"Time "+(i+1)
+),
+
+datasets:[{
+
+label:'Nível Total',
+
+data:dados,
+
+borderWidth:1
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+labels:{
+color:'white'
 }
+}
+
+},
+
+scales:{
+
+x:{
+ticks:{
+color:'white'
+}
+},
+
+y:{
+beginAtZero:true,
+ticks:{
+color:'white'
+}
+}
+
+}
+
+}
+
 });
+
 }
 
-/* botões */
-function reorganizar(){balancear();salvar();render();}
-function corrigirTimes(){balancear();salvar();render();}
-function resetar(){times=[];fila=[...jogadores];salvar();render();}
+/* botoes */
+function reorganizar(){
 
+balancear();
+
+salvar();
+
+render();
+
+}
+
+function corrigirTimes(){
+
+balancear();
+
+salvar();
+
+render();
+
+}
+
+function resetar(){
+
+times=[];
+
+fila=[...jogadores];
+
+balancear();
+
+salvar();
+
+render();
+
+}
+
+/* iniciar */
 carregar();
 
 </script>
