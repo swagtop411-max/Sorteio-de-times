@@ -8,7 +8,6 @@
 
 <title>M&M VÔLEI PRO</title>
 
-<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
@@ -41,15 +40,8 @@ pointer-events:none;
 z-index:0;
 }
 
-.left{
-left:0;
-}
-
-.right{
-right:0;
-}
-
-/* container */
+.left{left:0;}
+.right{right:0;}
 
 .container{
 position:relative;
@@ -59,15 +51,17 @@ margin:auto;
 padding:20px;
 }
 
-/* cards */
-
 .card{
-background:rgba(0,0,0,0.78);
+background:rgba(0,0,0,0.8);
 padding:20px;
 border-radius:20px;
 margin-bottom:20px;
 backdrop-filter:blur(8px);
 box-shadow:0 0 20px rgba(0,0,0,0.4);
+}
+
+h1{
+margin-bottom:20px;
 }
 
 /* login */
@@ -87,10 +81,7 @@ background:#111827;
 padding:30px;
 border-radius:20px;
 width:320px;
-box-shadow:0 0 25px rgba(0,0,0,0.5);
 }
-
-/* inputs */
 
 input,
 select{
@@ -100,8 +91,6 @@ border-radius:10px;
 margin:5px;
 font-size:15px;
 }
-
-/* buttons */
 
 button{
 padding:12px 18px;
@@ -118,8 +107,6 @@ button:hover{
 transform:scale(1.03);
 }
 
-/* lista */
-
 ul{
 padding:0;
 }
@@ -128,8 +115,6 @@ li{
 list-style:none;
 margin:10px 0;
 }
-
-/* remover */
 
 .removeBtn{
 background:red;
@@ -147,10 +132,9 @@ margin-top:20px;
 }
 
 .time{
-background:rgba(0,0,0,0.8);
+background:rgba(0,0,0,0.82);
 padding:15px;
 border-radius:18px;
-box-shadow:0 0 15px rgba(0,0,0,0.35);
 }
 
 .time h3{
@@ -196,15 +180,9 @@ transform:scale(1);
 
 to{
 opacity:1;
-transform:scale(1.1);
+transform:scale(1.08);
 }
 
-}
-
-/* fila */
-
-#fila p{
-margin:8px 0;
 }
 
 /* mobile */
@@ -229,12 +207,12 @@ width:100%;
 
 <body>
 
-<!-- laterais -->
+<!-- imagens laterais -->
 
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
 
-<!-- login -->
+<!-- LOGIN -->
 
 <div id="loginTela">
 
@@ -278,7 +256,7 @@ placeholder="Senha Admin"
 
 <div class="container">
 
-<h1 style="margin-bottom:20px;">
+<h1>
 🏐 M&M VÔLEI PRO
 </h1>
 
@@ -377,25 +355,23 @@ appId: "1:169025334598:web:dcae7c136755b4f0d80947"
 
 };
 
-const appFirebase=initializeApp(firebaseConfig);
+const appFirebase = initializeApp(firebaseConfig);
 
-const db=getFirestore(appFirebase);
+const db = getFirestore(appFirebase);
 
-const ref=doc(db,"app","dados");
+const ref = doc(db,"app","dados");
 
 /* senha */
 
-const SENHA="147580";
+const SENHA = "147580";
 
-/* modo */
+/* estado */
 
-let admin=false;
+let admin = false;
 
-/* dados */
-
-let jogadores=[];
-let times=[];
-let fila=[];
+let jogadores = [];
+let times = [];
+let fila = [];
 
 /* realtime */
 
@@ -405,17 +381,17 @@ try{
 
 if(snapshot.exists()){
 
-const dados=snapshot.data();
+const dados = snapshot.data();
 
-jogadores=Array.isArray(dados.jogadores)
+jogadores = Array.isArray(dados.jogadores)
 ? dados.jogadores
 : [];
 
-times=Array.isArray(dados.times)
+times = Array.isArray(dados.times)
 ? dados.times
 : [];
 
-fila=Array.isArray(dados.fila)
+fila = Array.isArray(dados.fila)
 ? dados.fila
 : [];
 
@@ -425,7 +401,7 @@ render();
 
 }catch(e){
 
-console.error(e);
+console.error("ERRO SNAPSHOT:",e);
 
 }
 
@@ -435,17 +411,27 @@ console.error(e);
 
 async function salvar(){
 
+try{
+
 await setDoc(ref,{
 jogadores,
 times,
 fila
 });
 
+}catch(e){
+
+console.error("ERRO FIREBASE:",e);
+
+throw e;
+
 }
 
-/* login visitante */
+}
 
-window.entrarVisitante=function(){
+/* login */
+
+window.entrarVisitante = function(){
 
 document
 .getElementById("loginTela")
@@ -453,16 +439,14 @@ document
 
 };
 
-/* login admin */
+window.entrarAdmin = function(){
 
-window.entrarAdmin=function(){
-
-let senha=
+let senha =
 document.getElementById("senhaAdmin").value;
 
-if(senha===SENHA){
+if(senha === SENHA){
 
-admin=true;
+admin = true;
 
 document
 .getElementById("loginTela")
@@ -482,29 +466,30 @@ alert("Senha incorreta");
 
 /* add */
 
-window.add=async function(){
+window.add = async function(){
 
 if(!admin)return;
 
-let nome=
+let nome =
 document.getElementById("nome").value.trim();
 
-let genero=
+let genero =
 document.getElementById("genero").value;
 
-let nivel=parseInt(
+let nivel =
+parseInt(
 document.getElementById("nivel").value
 );
 
-if(nome===""){
+if(nome === ""){
 
 alert("Digite um nome");
 return;
 
 }
 
-let existe=jogadores.some(j=>
-j.nome.toLowerCase()===nome.toLowerCase()
+let existe = jogadores.some(j=>
+j.nome.toLowerCase() === nome.toLowerCase()
 );
 
 if(existe){
@@ -522,19 +507,19 @@ nivel
 
 await salvar();
 
-document.getElementById("nome").value="";
+document.getElementById("nome").value = "";
 document.getElementById("nome").focus();
 
 };
 
 /* remover */
 
-window.removerJogador=async function(nome){
+window.removerJogador = async function(nome){
 
 if(!admin)return;
 
-jogadores=jogadores.filter(
-j=>j.nome!==nome
+jogadores = jogadores.filter(
+j => j.nome !== nome
 );
 
 await salvar();
@@ -551,7 +536,7 @@ return 0;
 
 return time.reduce((a,j)=>{
 
-return a+(Number(j.nivel)||0);
+return a + (Number(j.nivel)||0);
 
 },0);
 
@@ -561,15 +546,15 @@ return a+(Number(j.nivel)||0);
 
 function sortear(){
 
-times=[];
-fila=[];
+times = [];
+fila = [];
 
 /* separa */
 
-let homens=[...jogadores]
+let homens = jogadores
 .filter(j=>j.genero==="M");
 
-let mulheres=[...jogadores]
+let mulheres = jogadores
 .filter(j=>j.genero==="F");
 
 /* embaralha */
@@ -577,32 +562,32 @@ let mulheres=[...jogadores]
 homens.sort(()=>Math.random()-0.5);
 mulheres.sort(()=>Math.random()-0.5);
 
-/* quantidade de times */
+/* qtd times */
 
-let qtdTimes=Math.floor(
+let qtdTimes = Math.floor(
 Math.min(
 homens.length/2,
 mulheres.length/2
 )
 );
 
-/* cria times */
+/* monta */
 
 for(let i=0;i<qtdTimes;i++){
 
-let time=[];
+let time = [];
 
-/* 2 homens */
-
-if(homens.length>0){
-time.push(homens.shift());
-}
+/* homens */
 
 if(homens.length>0){
 time.push(homens.shift());
 }
 
-/* 2 mulheres */
+if(homens.length>0){
+time.push(homens.shift());
+}
+
+/* mulheres */
 
 if(mulheres.length>0){
 time.push(mulheres.shift());
@@ -618,7 +603,7 @@ times.push(time);
 
 }
 
-/* restante vai fila */
+/* sobra */
 
 fila.push(...homens);
 fila.push(...mulheres);
@@ -627,31 +612,32 @@ fila.push(...mulheres);
 
 /* animação */
 
-window.sortearAnimado=function(){
+window.sortearAnimado = function(){
 
 if(!admin)return;
 
-if(jogadores.length<4){
+if(jogadores.length < 4){
 
-alert("Cadastre atletas suficientes.");
-
+alert("Cadastre atletas suficientes");
 return;
 
 }
 
-let tela=document.getElementById("animacao");
+let tela =
+document.getElementById("animacao");
 
-let nomeAnimado=document.getElementById("nomeAnimado");
+let nomeAnimado =
+document.getElementById("nomeAnimado");
 
 tela.classList.remove("hidden");
 
-let i=0;
+let i = 0;
 
-let intervalo=setInterval(()=>{
+let intervalo = setInterval(()=>{
 
 if(jogadores.length>0){
 
-nomeAnimado.innerHTML=
+nomeAnimado.innerHTML =
 jogadores[i % jogadores.length].nome;
 
 i++;
@@ -659,6 +645,8 @@ i++;
 }
 
 },100);
+
+/* FINAL */
 
 setTimeout(async()=>{
 
@@ -674,9 +662,13 @@ render();
 
 }catch(erro){
 
-console.error(erro);
+console.error("ERRO REAL:",erro);
 
-alert("Erro no sorteio");
+alert(
+"ERRO:\n\n" +
+erro.message +
+"\n\nAbra F12 para detalhes."
+);
 
 }
 
@@ -694,13 +686,14 @@ try{
 
 /* lista */
 
-let ul=document.getElementById("lista");
+let ul =
+document.getElementById("lista");
 
-ul.innerHTML="";
+ul.innerHTML = "";
 
 jogadores.forEach(j=>{
 
-ul.innerHTML+=`
+ul.innerHTML += `
 
 <li>
 
@@ -722,13 +715,14 @@ ${admin
 
 /* times */
 
-let div=document.getElementById("times");
+let div =
+document.getElementById("times");
 
-div.innerHTML="";
+div.innerHTML = "";
 
 times.forEach((t,i)=>{
 
-div.innerHTML+=`
+div.innerHTML += `
 
 <div class="time">
 
@@ -758,17 +752,18 @@ ${j.nome}
 
 /* fila */
 
-let filaDiv=document.getElementById("fila");
+let filaDiv =
+document.getElementById("fila");
 
-filaDiv.innerHTML=`
+filaDiv.innerHTML = `
 <h2 style="margin-bottom:15px;">
 Fila
 </h2>
 `;
 
-if(fila.length===0){
+if(fila.length === 0){
 
-filaDiv.innerHTML+=`
+filaDiv.innerHTML += `
 <p>
 Nenhum atleta na fila
 </p>
@@ -778,7 +773,7 @@ Nenhum atleta na fila
 
 fila.forEach(j=>{
 
-filaDiv.innerHTML+=`
+filaDiv.innerHTML += `
 <p>
 ${j.nome}
 (${j.genero} N${j.nivel})
@@ -795,7 +790,7 @@ grafico();
 
 }catch(e){
 
-console.error(e);
+console.error("ERRO RENDER:",e);
 
 }
 
@@ -807,13 +802,17 @@ function grafico(){
 
 try{
 
-const canvas=document.getElementById("grafico");
+const canvas =
+document.getElementById("grafico");
 
 if(!canvas)return;
 
-const ctx=canvas.getContext("2d");
+const ctx =
+canvas.getContext("2d");
 
 if(!ctx)return;
+
+/* destrói */
 
 if(window.graficoObj){
 
@@ -821,13 +820,17 @@ window.graficoObj.destroy();
 
 }
 
-const labels=times.map(
-(_,i)=>`Time ${i+1}`
-);
+/* dados */
 
-const dados=times.map(t=>soma(t));
+const labels =
+times.map((_,i)=>`Time ${i+1}`);
 
-window.graficoObj=new Chart(ctx,{
+const dados =
+times.map(t=>soma(t));
+
+/* cria */
+
+window.graficoObj = new Chart(ctx,{
 
 type:"bar",
 
@@ -888,17 +891,18 @@ console.error("ERRO GRAFICO:",e);
 
 /* exportar */
 
-window.exportarImagem=function(){
+window.exportarImagem = function(){
 
 html2canvas(
 document.getElementById("times")
 ).then(canvas=>{
 
-let link=document.createElement("a");
+let link =
+document.createElement("a");
 
-link.download="times.png";
+link.download = "times.png";
 
-link.href=canvas.toDataURL();
+link.href = canvas.toDataURL();
 
 link.click();
 
