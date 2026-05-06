@@ -8,7 +8,7 @@
 
 <title>M&M VÔLEI PRO</title>
 
-<!-- Bibliotecas -->
+<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
@@ -229,7 +229,7 @@ width:100%;
 
 <body>
 
-<!-- imagens laterais -->
+<!-- laterais -->
 
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
@@ -401,15 +401,31 @@ let fila=[];
 
 onSnapshot(ref,(snapshot)=>{
 
+try{
+
 if(snapshot.exists()){
 
 const dados=snapshot.data();
 
-jogadores=dados.jogadores || [];
-times=dados.times || [];
-fila=dados.fila || [];
+jogadores=Array.isArray(dados.jogadores)
+? dados.jogadores
+: [];
+
+times=Array.isArray(dados.times)
+? dados.times
+: [];
+
+fila=Array.isArray(dados.fila)
+? dados.fila
+: [];
 
 render();
+
+}
+
+}catch(e){
+
+console.error(e);
 
 }
 
@@ -529,10 +545,15 @@ await salvar();
 
 function soma(time){
 
-return time.reduce(
-(a,j)=>a+(j.nivel || 0),
-0
-);
+if(!Array.isArray(time)){
+return 0;
+}
+
+return time.reduce((a,j)=>{
+
+return a+(Number(j.nivel)||0);
+
+},0);
 
 }
 
@@ -565,7 +586,7 @@ mulheres.length/2
 )
 );
 
-/* cria */
+/* cria times */
 
 for(let i=0;i<qtdTimes;i++){
 
@@ -597,7 +618,7 @@ times.push(time);
 
 }
 
-/* sobra vai fila */
+/* restante vai fila */
 
 fila.push(...homens);
 fila.push(...mulheres);
@@ -668,6 +689,8 @@ tela.classList.add("hidden");
 /* render */
 
 function render(){
+
+try{
 
 /* lista */
 
@@ -770,11 +793,19 @@ ${j.nome}
 
 grafico();
 
+}catch(e){
+
+console.error(e);
+
+}
+
 }
 
 /* gráfico */
 
 function grafico(){
+
+try{
 
 const canvas=document.getElementById("grafico");
 
@@ -782,11 +813,19 @@ if(!canvas)return;
 
 const ctx=canvas.getContext("2d");
 
+if(!ctx)return;
+
 if(window.graficoObj){
 
 window.graficoObj.destroy();
 
 }
+
+const labels=times.map(
+(_,i)=>`Time ${i+1}`
+);
+
+const dados=times.map(t=>soma(t));
 
 window.graficoObj=new Chart(ctx,{
 
@@ -794,15 +833,13 @@ type:"bar",
 
 data:{
 
-labels:times.map(
-(_,i)=>`Time ${i+1}`
-),
+labels:labels,
 
 datasets:[{
 
 label:"Nível Total",
 
-data:times.map(t=>soma(t))
+data:dados
 
 }]
 
@@ -840,6 +877,12 @@ color:"white"
 }
 
 });
+
+}catch(e){
+
+console.error("ERRO GRAFICO:",e);
+
+}
 
 }
 
