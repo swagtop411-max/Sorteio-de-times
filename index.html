@@ -27,7 +27,7 @@ overflow-x:hidden;
 text-align:center;
 }
 
-/* laterais */
+/* imagens laterais */
 
 .lateral{
 position:fixed;
@@ -43,6 +43,8 @@ z-index:0;
 .left{left:0;}
 .right{right:0;}
 
+/* container */
+
 .container{
 position:relative;
 z-index:1;
@@ -50,6 +52,8 @@ max-width:1200px;
 margin:auto;
 padding:20px;
 }
+
+/* cards */
 
 .card{
 background:rgba(0,0,0,0.8);
@@ -59,6 +63,8 @@ margin-bottom:20px;
 backdrop-filter:blur(8px);
 box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
+
+/* títulos */
 
 h1{
 margin-bottom:20px;
@@ -83,6 +89,8 @@ border-radius:20px;
 width:320px;
 }
 
+/* inputs */
+
 input,
 select{
 padding:12px;
@@ -91,6 +99,8 @@ border-radius:10px;
 margin:5px;
 font-size:15px;
 }
+
+/* botões */
 
 button{
 padding:12px 18px;
@@ -107,6 +117,8 @@ button:hover{
 transform:scale(1.03);
 }
 
+/* lista */
+
 ul{
 padding:0;
 }
@@ -115,6 +127,8 @@ li{
 list-style:none;
 margin:10px 0;
 }
+
+/* remover */
 
 .removeBtn{
 background:red;
@@ -185,6 +199,12 @@ transform:scale(1.08);
 
 }
 
+/* fila */
+
+#fila p{
+margin:8px 0;
+}
+
 /* mobile */
 
 @media(max-width:900px){
@@ -207,7 +227,7 @@ width:100%;
 
 <body>
 
-<!-- imagens laterais -->
+<!-- laterais -->
 
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
@@ -411,21 +431,11 @@ console.error("ERRO SNAPSHOT:",e);
 
 async function salvar(){
 
-try{
-
 await setDoc(ref,{
 jogadores,
 times,
 fila
 });
-
-}catch(e){
-
-console.error("ERRO FIREBASE:",e);
-
-throw e;
-
-}
 
 }
 
@@ -528,13 +538,11 @@ await salvar();
 
 /* soma */
 
-function soma(time){
+function soma(lista){
 
-if(!Array.isArray(time)){
-return 0;
-}
+if(!Array.isArray(lista)) return 0;
 
-return time.reduce((a,j)=>{
+return lista.reduce((a,j)=>{
 
 return a + (Number(j.nivel)||0);
 
@@ -551,18 +559,20 @@ fila = [];
 
 /* separa */
 
-let homens = jogadores
-.filter(j=>j.genero==="M");
+let homens = jogadores.filter(
+j=>j.genero==="M"
+);
 
-let mulheres = jogadores
-.filter(j=>j.genero==="F");
+let mulheres = jogadores.filter(
+j=>j.genero==="F"
+);
 
 /* embaralha */
 
 homens.sort(()=>Math.random()-0.5);
 mulheres.sort(()=>Math.random()-0.5);
 
-/* qtd times */
+/* qtd */
 
 let qtdTimes = Math.floor(
 Math.min(
@@ -571,35 +581,41 @@ mulheres.length/2
 )
 );
 
-/* monta */
+/* cria */
 
 for(let i=0;i<qtdTimes;i++){
 
-let time = [];
+let jogadoresTime = [];
 
 /* homens */
 
 if(homens.length>0){
-time.push(homens.shift());
+jogadoresTime.push(homens.shift());
 }
 
 if(homens.length>0){
-time.push(homens.shift());
+jogadoresTime.push(homens.shift());
 }
 
 /* mulheres */
 
 if(mulheres.length>0){
-time.push(mulheres.shift());
+jogadoresTime.push(mulheres.shift());
 }
 
 if(mulheres.length>0){
-time.push(mulheres.shift());
+jogadoresTime.push(mulheres.shift());
 }
 
-/* adiciona */
+/* salva objeto */
 
-times.push(time);
+times.push({
+
+numero:i+1,
+
+jogadores:jogadoresTime
+
+});
 
 }
 
@@ -646,7 +662,7 @@ i++;
 
 },100);
 
-/* FINAL */
+/* final */
 
 setTimeout(async()=>{
 
@@ -662,12 +678,11 @@ render();
 
 }catch(erro){
 
-console.error("ERRO REAL:",erro);
+console.error("ERRO:",erro);
 
 alert(
 "ERRO:\n\n" +
-erro.message +
-"\n\nAbra F12 para detalhes."
+erro.message
 );
 
 }
@@ -720,14 +735,16 @@ document.getElementById("times");
 
 div.innerHTML = "";
 
-times.forEach((t,i)=>{
+times.forEach((timeObj)=>{
+
+let t = timeObj.jogadores;
 
 div.innerHTML += `
 
 <div class="time">
 
 <h3>
-🏐 TIME ${i+1}
+🏐 TIME ${timeObj.numero}
 </h3>
 
 <p style="margin-bottom:10px;">
@@ -761,7 +778,7 @@ Fila
 </h2>
 `;
 
-if(fila.length === 0){
+if(fila.length===0){
 
 filaDiv.innerHTML += `
 <p>
@@ -820,13 +837,17 @@ window.graficoObj.destroy();
 
 }
 
+/* labels */
+
+const labels = times.map(
+t=>`Time ${t.numero}`
+);
+
 /* dados */
 
-const labels =
-times.map((_,i)=>`Time ${i+1}`);
-
-const dados =
-times.map(t=>soma(t));
+const dados = times.map(
+t=>soma(t.jogadores)
+);
 
 /* cria */
 
