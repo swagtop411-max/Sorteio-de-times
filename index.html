@@ -6,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>M&M VÔLEI PRO</title>
+<title>SISTEMA INTELIGENTE DE SORTEIO</title>
 
 <!-- bibliotecas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -118,6 +118,25 @@ cursor:grab;
 display:none !important;
 }
 
+/* login */
+#loginTela{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.95);
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:99999;
+}
+
+.loginBox{
+background:#111827;
+padding:30px;
+border-radius:20px;
+width:320px;
+box-shadow:0 0 25px rgba(0,0,0,0.5);
+}
+
 /* animação */
 #animacao{
 position:fixed;
@@ -174,6 +193,13 @@ list-style:none;
 margin:8px 0;
 }
 
+/* remove */
+.removeBtn{
+background:red;
+color:white;
+margin-left:10px;
+}
+
 /* mobile */
 @media(max-width:900px){
 
@@ -196,7 +222,34 @@ box-sizing:border-box;
 
 <body>
 
-<!-- imagens laterais -->
+<!-- LOGIN -->
+<div id="loginTela">
+
+<div class="loginBox">
+
+<h2>🏐 M&M VÔLEI PRO</h2>
+
+<button onclick="entrarVisitante()">
+👤 Entrar como Visitante
+</button>
+
+<hr>
+
+<input
+type="password"
+id="senhaAdmin"
+placeholder="Senha Admin"
+>
+
+<button onclick="entrarAdmin()">
+👑 Entrar como Admin
+</button>
+
+</div>
+
+</div>
+
+<!-- imagens -->
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
 
@@ -215,8 +268,8 @@ box-sizing:border-box;
 
 <h1>🏐 M&M VÔLEI PRO</h1>
 
-<!-- cadastro -->
-<div class="card">
+<!-- ADMIN -->
+<div id="adminArea" class="card hidden">
 
 <input id="nome" placeholder="Nome do atleta">
 
@@ -323,6 +376,12 @@ const db=getFirestore(appFirebase);
 
 const ref=doc(db,"app","dados");
 
+/* senha */
+const SENHA="147580";
+
+/* modo */
+let admin=false;
+
 /* dados */
 let jogadores=[];
 let times=[];
@@ -356,8 +415,52 @@ fila
 
 }
 
+/* login visitante */
+window.entrarVisitante=function(){
+
+document
+.getElementById("loginTela")
+.classList.add("hidden");
+
+render();
+
+};
+
+/* login admin */
+window.entrarAdmin=function(){
+
+let senha=document
+.getElementById("senhaAdmin")
+.value;
+
+if(senha===SENHA){
+
+admin=true;
+
+document
+.getElementById("loginTela")
+.classList.add("hidden");
+
+document
+.getElementById("adminArea")
+.classList.remove("hidden");
+
+render();
+
+}else{
+
+alert("Senha incorreta");
+
+}
+
+};
+
 /* add */
 window.add = async function(){
+
+if(!admin){
+return;
+}
 
 let nome=document.getElementById("nome").value.trim();
 
@@ -374,7 +477,6 @@ return;
 
 }
 
-/* repetido */
 let existe=jogadores.some(j=>
 j.nome.toLowerCase()===nome.toLowerCase()
 );
@@ -386,7 +488,6 @@ return;
 
 }
 
-/* add */
 jogadores.push({
 nome,
 genero,
@@ -395,9 +496,23 @@ nivel
 
 await salvar();
 
-/* limpa */
 document.getElementById("nome").value="";
 document.getElementById("nome").focus();
+
+};
+
+/* remover */
+window.removerJogador = async function(nome){
+
+if(!admin){
+return;
+}
+
+jogadores=jogadores.filter(
+j=>j.nome!==nome
+);
+
+await salvar();
 
 };
 
@@ -414,26 +529,21 @@ return time.reduce(
 /* sorteio animado */
 window.sortearAnimado = async function(){
 
-/* validação */
-let homens=jogadores.filter(j=>j.genero==="M").length;
-
-let mulheres=jogadores.filter(j=>j.genero==="F").length;
-
-if(homens < 2 || mulheres < 2){
-
-alert("Necessário ao menos 2 homens e 2 mulheres.");
-
+if(!admin){
 return;
-
 }
 
-let qtdTimes=Math.floor(
-Math.min(homens/2,mulheres/2)
-);
+let homens=jogadores.filter(
+j=>j.genero==="M"
+).length;
 
-if(qtdTimes<=0){
+let mulheres=jogadores.filter(
+j=>j.genero==="F"
+).length;
 
-alert("Não há atletas suficientes.");
+if(homens<2 || mulheres<2){
+
+alert("Necessário 2 homens e 2 mulheres.");
 
 return;
 
@@ -476,7 +586,7 @@ render();
 
 console.error(erro);
 
-alert("Erro ao montar os times.");
+alert("Erro no sorteio.");
 
 }finally{
 
@@ -494,7 +604,6 @@ function sortear(){
 times=[];
 fila=[];
 
-/* separar */
 let homens=[...jogadores]
 .filter(j=>j.genero==="M")
 .sort((a,b)=>b.nivel-a.nivel);
@@ -503,7 +612,6 @@ let mulheres=[...jogadores]
 .filter(j=>j.genero==="F")
 .sort((a,b)=>b.nivel-a.nivel);
 
-/* qtd times */
 let qtd=Math.floor(
 Math.min(
 homens.length/2,
@@ -511,20 +619,17 @@ mulheres.length/2
 )
 );
 
-/* criar */
 for(let i=0;i<qtd;i++){
 
 times.push([]);
 
 }
 
-/* encaixar */
 function encaixar(lista,genero){
 
 lista.forEach(j=>{
 
 let melhor=null;
-
 let menor=999;
 
 times.forEach(t=>{
@@ -565,12 +670,9 @@ fila.push(j);
 
 }
 
-/* distribuir */
 encaixar(homens,"M");
-
 encaixar(mulheres,"F");
 
-/* validar */
 let completos=[];
 
 times.forEach(t=>{
@@ -611,7 +713,16 @@ jogadores.forEach(j=>{
 
 ul.innerHTML+=`
 <li>
+
 ${j.nome} (${j.genero} N${j.nivel})
+
+${admin
+?
+`<button class="removeBtn" onclick="removerJogador('${j.nome}')">❌</button>`
+:
+""
+}
+
 </li>
 `;
 
@@ -622,7 +733,6 @@ let div=document.getElementById("times");
 
 div.innerHTML="";
 
-/* média */
 let media=
 times.reduce((a,t)=>a+soma(t),0)
 / Math.max(times.length,1);
@@ -676,6 +786,8 @@ div.innerHTML+=html;
 });
 
 /* drag */
+if(admin){
+
 setTimeout(()=>{
 
 for(let i=0;i<times.length;i++){
@@ -695,6 +807,8 @@ animation:150
 }
 
 },100);
+
+}
 
 /* fila */
 let filaDiv=document.getElementById("fila");
