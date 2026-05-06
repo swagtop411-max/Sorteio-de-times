@@ -1,39 +1,703 @@
 <!DOCTYPE html>
-function(error,canvas){
-if(error)return;
-let qr=document.getElementById("qr");
-qr.innerHTML="";
-qr.appendChild(canvas);
+<html lang="pt-br">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>M&M Vôlei PRO</title>
+
+<!-- BIBLIOTECAS -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+
+<style>
+
+body{
+margin:0;
+font-family:Arial, Helvetica, sans-serif;
+background:linear-gradient(135deg,#020617,#0f172a,#1e3a8a);
+color:white;
+overflow-x:hidden;
+text-align:center;
+}
+
+/* laterais */
+.lateral{
+position:fixed;
+top:0;
+height:100%;
+width:260px;
+object-fit:cover;
+z-index:0;
+opacity:0.95;
+pointer-events:none;
+}
+
+.left{left:0;}
+.right{right:0;}
+
+/* container */
+.container{
+max-width:1200px;
+margin:auto;
+padding:20px;
+position:relative;
+z-index:1;
+}
+
+/* cards */
+.card{
+background:rgba(0,0,0,0.75);
+padding:20px;
+border-radius:18px;
+margin-bottom:20px;
+backdrop-filter:blur(8px);
+box-shadow:0 0 20px rgba(0,0,0,0.35);
+}
+
+/* inputs */
+input,select{
+padding:12px;
+border:none;
+border-radius:10px;
+margin:5px;
+font-size:15px;
+}
+
+/* buttons */
+button{
+padding:12px 18px;
+border:none;
+border-radius:10px;
+cursor:pointer;
+font-weight:bold;
+margin:5px;
+transition:0.2s;
+font-size:15px;
+}
+
+button:hover{
+transform:scale(1.03);
+}
+
+/* grid times */
+#times{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:20px;
+margin-top:20px;
+}
+
+/* time */
+.time{
+background:rgba(0,0,0,0.78);
+padding:15px;
+border-radius:18px;
+box-shadow:0 0 15px rgba(0,0,0,0.35);
+border:1px solid rgba(255,255,255,0.08);
+}
+
+.time h3{
+color:#60a5fa;
+}
+
+/* player */
+.player{
+background:rgba(255,255,255,0.08);
+padding:8px;
+border-radius:8px;
+margin:6px 0;
+cursor:grab;
+}
+
+/* hidden */
+.hidden{
+display:none;
+}
+
+/* animação */
+#animacao{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.95);
+display:flex;
+justify-content:center;
+align-items:center;
+flex-direction:column;
+z-index:9999;
+font-size:40px;
+}
+
+.glow{
+animation:glow 1s infinite alternate;
+}
+
+@keyframes glow{
+from{
+opacity:0.5;
+transform:scale(1);
+}
+to{
+opacity:1;
+transform:scale(1.1);
+}
+}
+
+/* fila */
+#fila{
+margin-top:20px;
+}
+
+/* qr */
+#qr{
+display:flex;
+justify-content:center;
+margin-top:20px;
+}
+
+/* tv */
+#tvPanel{
+background:black;
+padding:20px;
+border-radius:20px;
+margin-top:20px;
+}
+
+/* mobile */
+@media(max-width:900px){
+
+.lateral{
+display:none;
+}
+
+button,
+input,
+select{
+width:100%;
+box-sizing:border-box;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<img src="MeM.jpg" class="lateral left">
+<img src="MeM.jpg" class="lateral right">
+
+<!-- animação -->
+<div id="animacao" class="hidden">
+
+<div class="glow">
+🏐 SORTEANDO TIMES...
+</div>
+
+<h2 id="nomeAnimado"></h2>
+
+</div>
+
+<div class="container">
+
+<h1>🏐 M&M VÔLEI PRO</h1>
+
+<!-- cadastro -->
+<div class="card">
+
+<input id="nome" placeholder="Nome do atleta">
+
+<select id="genero">
+<option value="M">Masculino</option>
+<option value="F">Feminino</option>
+</select>
+
+<select id="nivel">
+<option value="1">N1</option>
+<option value="2">N2</option>
+<option value="3">N3</option>
+<option value="4">N4</option>
+<option value="5">N5</option>
+</select>
+
+<button onclick="add()">
+➕ Adicionar
+</button>
+
+<button onclick="sortearAnimado()">
+🎲 Sorteio Animado
+</button>
+
+<button onclick="exportarImagem()">
+📸 Exportar
+</button>
+
+</div>
+
+<!-- lista -->
+<div class="card">
+
+<h2>Jogadores</h2>
+
+<ul id="lista"></ul>
+
+</div>
+
+<!-- gráfico -->
+<div class="card">
+
+<canvas id="grafico"></canvas>
+
+</div>
+
+<!-- estatísticas -->
+<div id="estatisticas" class="card"></div>
+
+<!-- times -->
+<div id="times"></div>
+
+<!-- fila -->
+<div id="fila" class="card"></div>
+
+<!-- qr -->
+<div class="card">
+
+<h2>QR Code do App</h2>
+
+<div id="qr"></div>
+
+</div>
+
+<!-- tv -->
+<div id="tvPanel">
+
+<h2>📺 Painel TV / OBS</h2>
+
+<div id="tvConteudo"></div>
+
+</div>
+
+</div>
+
+<!-- FIREBASE -->
+<script type="module">
+
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+getFirestore,
+doc,
+setDoc,
+onSnapshot
+} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+/* firebase */
+const firebaseConfig = {
+
+apiKey: "AIzaSyDNBTUXydUU8gxdteO4_dwQn65WpLGoRV4",
+authDomain: "sorteio-de-times-aleatorios.firebaseapp.com",
+projectId: "sorteio-de-times-aleatorios",
+storageBucket: "sorteio-de-times-aleatorios.firebasestorage.app",
+messagingSenderId: "169025334598",
+appId: "1:169025334598:web:dcae7c136755b4f0d80947",
+measurementId: "G-HC4H5DK7DD"
+
+};
+
+const appFirebase=initializeApp(firebaseConfig);
+
+const db=getFirestore(appFirebase);
+
+const ref=doc(db,"app","dados");
+
+/* dados */
+let jogadores=[];
+let times=[];
+let fila=[];
+
+/* realtime */
+onSnapshot(ref,(snapshot)=>{
+
+if(snapshot.exists()){
+
+const dados=snapshot.data();
+
+jogadores=dados.jogadores || [];
+times=dados.times || [];
+fila=dados.fila || [];
+
+render();
+
+}
+
+});
+
+/* salvar */
+async function salvar(){
+
+await setDoc(ref,{
+jogadores,
+times,
+fila
+});
+
+}
+
+/* add */
+window.add=async function(){
+
+let nome=document.getElementById("nome").value.trim();
+
+let genero=document.getElementById("genero").value;
+
+let nivel=parseInt(
+document.getElementById("nivel").value
+);
+
+if(nome===""){
+alert("Digite um nome");
+return;
+}
+
+/* repetido */
+let existe=jogadores.some(j=>
+j.nome.toLowerCase()===nome.toLowerCase()
+);
+
+if(existe){
+alert("Jogador já cadastrado");
+return;
+}
+
+jogadores.push({
+nome,
+genero,
+nivel
+});
+
+await salvar();
+
+/* limpa */
+document.getElementById("nome").value="";
+document.getElementById("nome").focus();
+
+};
+
+/* soma */
+function soma(time){
+
+return time.reduce(
+(a,j)=>a+j.nivel,
+0
+);
+
+}
+
+/* sorteio animado */
+window.sortearAnimado=function(){
+
+let tela=document.getElementById("animacao");
+
+let nomeAnimado=document.getElementById("nomeAnimado");
+
+tela.classList.remove("hidden");
+
+let i=0;
+
+let intervalo=setInterval(()=>{
+
+if(jogadores.length>0){
+
+nomeAnimado.innerHTML=
+jogadores[i % jogadores.length].nome;
+
+i++;
+
+}
+
+},100);
+
+setTimeout(async()=>{
+
+clearInterval(intervalo);
+
+sortear();
+
+await salvar();
+
+render();
+
+tela.classList.add("hidden");
+
+},3000);
+
+};
+
+/* sorteio */
+function sortear(){
+
+times=[];
+fila=[];
+
+/* separar */
+let homens=[...jogadores]
+.filter(j=>j.genero==="M")
+.sort((a,b)=>b.nivel-a.nivel);
+
+let mulheres=[...jogadores]
+.filter(j=>j.genero==="F")
+.sort((a,b)=>b.nivel-a.nivel);
+
+/* qtd */
+let qtd=Math.floor(
+Math.min(
+homens.length/2,
+mulheres.length/2
+)
+);
+
+/* cria times */
+for(let i=0;i<qtd;i++){
+
+times.push([]);
+
+}
+
+/* encaixe */
+function encaixar(lista,genero){
+
+lista.forEach(j=>{
+
+let melhor=null;
+let menor=999;
+
+times.forEach(t=>{
+
+let qtdGenero=t.filter(
+a=>a.genero===genero
+).length;
+
+let total=soma(t);
+
+if(
+qtdGenero<2 &&
+(total+j.nivel)<=12
+){
+
+if(total<menor){
+
+menor=total;
+melhor=t;
+
+}
+
+}
+
+});
+
+if(melhor){
+
+melhor.push(j);
+
+}else{
+
+fila.push(j);
+
+}
+
+});
+
+}
+
+/* distribuir */
+encaixar(homens,"M");
+encaixar(mulheres,"F");
+
+/* validar */
+let completos=[];
+
+times.forEach(t=>{
+
+let h=t.filter(
+j=>j.genero==="M"
+).length;
+
+let m=t.filter(
+j=>j.genero==="F"
+).length;
+
+if(h===2 && m===2){
+
+completos.push(t);
+
+}else{
+
+fila.push(...t);
+
+}
+
+});
+
+times=completos;
+
+}
+
+/* render */
+function render(){
+
+/* lista */
+let ul=document.getElementById("lista");
+
+ul.innerHTML="";
+
+jogadores.forEach(j=>{
+
+ul.innerHTML+=`
+<li>
+${j.nome} (${j.genero} N${j.nivel})
+</li>
+`;
+
+});
+
+/* times */
+let div=document.getElementById("times");
+
+div.innerHTML="";
+
+/* média */
+let media=
+times.reduce((a,t)=>a+soma(t),0)
+/ Math.max(times.length,1);
+
+times.forEach((t,i)=>{
+
+let equilibrio=
+100-Math.abs(soma(t)-media)*8;
+
+if(equilibrio<0){
+equilibrio=0;
+}
+
+let html=`
+<div class="time">
+
+<h3>🏐 TIME ${i+1}</h3>
+
+<p>
+⭐ Nível:
+${soma(t)}/12
+</p>
+
+<p>
+⚖️ Equilíbrio:
+${equilibrio.toFixed(0)}%
+</p>
+
+<hr>
+
+<div class="sortable" id="time${i}">
+`;
+
+t.forEach(j=>{
+
+html+=`
+<div class="player">
+${j.nome} (${j.genero} N${j.nivel})
+</div>
+`;
+
+});
+
+html+=`
+</div>
+</div>
+`;
+
+div.innerHTML+=html;
+
+});
+
+/* drag drop */
+setTimeout(()=>{
+
+for(let i=0;i<times.length;i++){
+
+new Sortable(
+document.getElementById(`time${i}`),
+{
+group:"times",
+animation:150
 }
 );
 
-/* painel tv */
-let tv=document.getElementById("tvConteudo");
+}
 
-tv.innerHTML=times.map((t,i)=>`
-<div>
-<h3>TIME ${i+1}</h3>
-<p>${t.map(a=>a.nome).join(" • ")}</p>
-</div>
-`).join("");
+},100);
+
+/* fila */
+let filaDiv=document.getElementById("fila");
+
+filaDiv.innerHTML=`
+<h2>Fila</h2>
+`;
+
+fila.forEach(j=>{
+
+filaDiv.innerHTML+=`
+<p>
+${j.nome} (${j.genero} N${j.nivel})
+</p>
+`;
+
+});
+
+/* estatísticas */
+estatisticas();
+
+/* gráfico */
+grafico();
+
+/* qr */
+gerarQR();
+
+/* tv */
+painelTV();
 
 }
 
+/* estatísticas */
 function estatisticas(){
 
 let div=document.getElementById("estatisticas");
 
-let texto=`
+div.innerHTML=`
 <h2>📊 Estatísticas</h2>
-<p>Jogadores cadastrados: ${jogadores.length}</p>
-<p>Times montados: ${times.length}</p>
-<p>Atletas na fila: ${fila.length}</p>
-`;
 
-div.innerHTML=texto;
+<p>
+Jogadores cadastrados:
+${jogadores.length}
+</p>
+
+<p>
+Times montados:
+${times.length}
+</p>
+
+<p>
+Atletas na fila:
+${fila.length}
+</p>
+`;
 
 }
 
+/* gráfico */
 function grafico(){
 
 let ctx=document.getElementById("grafico");
@@ -43,26 +707,127 @@ window.graficoObj.destroy();
 }
 
 window.graficoObj=new Chart(ctx,{
-type:'bar',
+
+type:"bar",
+
 data:{
-labels:times.map((_,i)=>`Time ${i+1}`),
+
+labels:times.map(
+(_,i)=>`Time ${i+1}`
+),
+
 datasets:[{
-label:'Nível Total',
-data:times.map(t=>soma(t))
+
+label:"Nível Total",
+
+data:times.map(
+t=>soma(t)
+)
+
 }]
+
 },
+
 options:{
+
 responsive:true,
+
 plugins:{
 legend:{
-labels:{color:'white'}
+labels:{
+color:"white"
+}
 }
 },
+
 scales:{
-x:{ticks:{color:'white'}},
-y:{ticks:{color:'white'},max:12,beginAtZero:true}
+
+x:{
+ticks:{
+color:"white"
+}
+},
+
+y:{
+beginAtZero:true,
+max:12,
+ticks:{
+color:"white"
 }
 }
+
+}
+
+}
+
+});
+
+}
+
+/* exportar */
+window.exportarImagem=function(){
+
+html2canvas(
+document.getElementById("times")
+).then(canvas=>{
+
+let link=document.createElement("a");
+
+link.download="times.png";
+
+link.href=canvas.toDataURL();
+
+link.click();
+
+});
+
+};
+
+/* qr */
+function gerarQR(){
+
+let qr=document.getElementById("qr");
+
+qr.innerHTML="";
+
+QRCode.toCanvas(
+window.location.href,
+function(error,canvas){
+
+if(error){
+return;
+}
+
+qr.appendChild(canvas);
+
+}
+);
+
+}
+
+/* tv */
+function painelTV(){
+
+let tv=document.getElementById("tvConteudo");
+
+tv.innerHTML="";
+
+times.forEach((t,i)=>{
+
+tv.innerHTML+=`
+<div>
+
+<h3>
+TIME ${i+1}
+</h3>
+
+<p>
+${t.map(a=>a.nome).join(" • ")}
+</p>
+
+</div>
+`;
+
 });
 
 }
