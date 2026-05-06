@@ -8,8 +8,10 @@
 
 <title>M&M VÔLEI PRO</title>
 
+<!-- libs -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <style>
 
@@ -27,13 +29,13 @@ overflow-x:hidden;
 text-align:center;
 }
 
-/* imagens laterais */
+/* laterais */
 
 .lateral{
 position:fixed;
 top:0;
 height:100%;
-width:320px;
+width:340px;
 object-fit:cover;
 opacity:0.95;
 pointer-events:none;
@@ -48,7 +50,7 @@ z-index:0;
 .container{
 position:relative;
 z-index:1;
-max-width:1200px;
+max-width:1300px;
 margin:auto;
 padding:20px;
 }
@@ -56,18 +58,19 @@ padding:20px;
 /* cards */
 
 .card{
-background:rgba(0,0,0,0.8);
+background:rgba(0,0,0,0.82);
 padding:20px;
-border-radius:20px;
+border-radius:22px;
 margin-bottom:20px;
-backdrop-filter:blur(8px);
-box-shadow:0 0 20px rgba(0,0,0,0.4);
+backdrop-filter:blur(10px);
+box-shadow:0 0 25px rgba(0,0,0,0.35);
 }
 
 /* títulos */
 
 h1{
 margin-bottom:20px;
+font-size:42px;
 }
 
 /* login */
@@ -84,9 +87,9 @@ z-index:99999;
 
 .loginBox{
 background:#111827;
-padding:30px;
-border-radius:20px;
-width:320px;
+padding:35px;
+border-radius:25px;
+width:340px;
 }
 
 /* inputs */
@@ -95,17 +98,17 @@ input,
 select{
 padding:12px;
 border:none;
-border-radius:10px;
+border-radius:12px;
 margin:5px;
 font-size:15px;
 }
 
-/* botões */
+/* buttons */
 
 button{
 padding:12px 18px;
 border:none;
-border-radius:10px;
+border-radius:12px;
 cursor:pointer;
 font-weight:bold;
 margin:5px;
@@ -140,27 +143,31 @@ margin-left:10px;
 
 #times{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
 gap:20px;
 margin-top:20px;
 }
 
 .time{
-background:rgba(0,0,0,0.82);
-padding:15px;
-border-radius:18px;
+background:rgba(0,0,0,0.86);
+padding:18px;
+border-radius:20px;
+box-shadow:0 0 20px rgba(0,0,0,0.35);
+min-height:220px;
 }
 
 .time h3{
 color:#60a5fa;
 margin-bottom:10px;
+font-size:24px;
 }
 
 .player{
 background:rgba(255,255,255,0.08);
-padding:8px;
-margin:6px 0;
-border-radius:8px;
+padding:10px;
+margin:8px 0;
+border-radius:10px;
+cursor:grab;
 }
 
 /* animação */
@@ -173,7 +180,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 flex-direction:column;
-font-size:42px;
+font-size:52px;
 z-index:9999;
 }
 
@@ -194,7 +201,7 @@ transform:scale(1);
 
 to{
 opacity:1;
-transform:scale(1.08);
+transform:scale(1.1);
 }
 
 }
@@ -202,6 +209,37 @@ transform:scale(1.08);
 /* fila */
 
 #fila p{
+margin:8px 0;
+}
+
+/* tv */
+
+#tv{
+background:black;
+padding:30px;
+border-radius:25px;
+margin-top:20px;
+}
+
+.tvTime{
+margin-bottom:25px;
+font-size:22px;
+}
+
+/* qr */
+
+#qr{
+margin-top:20px;
+display:flex;
+justify-content:center;
+}
+
+/* ranking */
+
+.rankItem{
+padding:10px;
+background:rgba(255,255,255,0.08);
+border-radius:10px;
 margin:8px 0;
 }
 
@@ -232,7 +270,7 @@ width:100%;
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
 
-<!-- LOGIN -->
+<!-- login -->
 
 <div id="loginTela">
 
@@ -243,7 +281,7 @@ width:100%;
 </h2>
 
 <button onclick="entrarVisitante()">
-👤 Entrar como Visitante
+👤 Entrar Visitante
 </button>
 
 <hr style="margin:20px 0;">
@@ -255,7 +293,7 @@ placeholder="Senha Admin"
 >
 
 <button onclick="entrarAdmin()">
-👑 Entrar como Admin
+👑 Entrar Admin
 </button>
 
 </div>
@@ -311,6 +349,10 @@ placeholder="Senha Admin"
 📸 Exportar
 </button>
 
+<button onclick="abrirTV()">
+📺 TV
+</button>
+
 </div>
 
 <!-- jogadores -->
@@ -329,7 +371,25 @@ Jogadores
 
 <div class="card">
 
+<h2 style="margin-bottom:20px;">
+📊 Estatísticas
+</h2>
+
 <canvas id="grafico"></canvas>
+
+<div id="estatisticas" style="margin-top:20px;"></div>
+
+</div>
+
+<!-- ranking -->
+
+<div class="card">
+
+<h2 style="margin-bottom:20px;">
+🏆 Ranking
+</h2>
+
+<div id="ranking"></div>
 
 </div>
 
@@ -342,8 +402,32 @@ Jogadores
 <div id="fila" class="card">
 
 <h2 style="margin-bottom:15px;">
-Fila
+🚨 Fila
 </h2>
+
+</div>
+
+<!-- tv -->
+
+<div id="tv" class="card hidden">
+
+<h2 style="margin-bottom:25px;">
+📺 PAINEL TV / OBS
+</h2>
+
+<div id="tvConteudo"></div>
+
+</div>
+
+<!-- qr -->
+
+<div class="card">
+
+<h2 style="margin-bottom:20px;">
+📱 QR CODE DO APP
+</h2>
+
+<div id="qr"></div>
 
 </div>
 
@@ -421,7 +505,7 @@ render();
 
 }catch(e){
 
-console.error("ERRO SNAPSHOT:",e);
+console.error(e);
 
 }
 
@@ -441,7 +525,7 @@ fila
 
 /* login */
 
-window.entrarVisitante = function(){
+window.entrarVisitante=function(){
 
 document
 .getElementById("loginTela")
@@ -449,14 +533,14 @@ document
 
 };
 
-window.entrarAdmin = function(){
+window.entrarAdmin=function(){
 
 let senha =
 document.getElementById("senhaAdmin").value;
 
-if(senha === SENHA){
+if(senha===SENHA){
 
-admin = true;
+admin=true;
 
 document
 .getElementById("loginTela")
@@ -476,7 +560,7 @@ alert("Senha incorreta");
 
 /* add */
 
-window.add = async function(){
+window.add=async function(){
 
 if(!admin)return;
 
@@ -491,15 +575,10 @@ parseInt(
 document.getElementById("nivel").value
 );
 
-if(nome === ""){
-
-alert("Digite um nome");
-return;
-
-}
+if(nome==="") return;
 
 let existe = jogadores.some(j=>
-j.nome.toLowerCase() === nome.toLowerCase()
+j.nome.toLowerCase()===nome.toLowerCase()
 );
 
 if(existe){
@@ -517,19 +596,18 @@ nivel
 
 await salvar();
 
-document.getElementById("nome").value = "";
-document.getElementById("nome").focus();
+document.getElementById("nome").value="";
 
 };
 
 /* remover */
 
-window.removerJogador = async function(nome){
+window.removerJogador=async function(nome){
 
 if(!admin)return;
 
-jogadores = jogadores.filter(
-j => j.nome !== nome
+jogadores=jogadores.filter(
+j=>j.nome!==nome
 );
 
 await salvar();
@@ -544,9 +622,17 @@ if(!Array.isArray(lista)) return 0;
 
 return lista.reduce((a,j)=>{
 
-return a + (Number(j.nivel)||0);
+return a+(Number(j.nivel)||0);
 
 },0);
+
+}
+
+/* balanceamento */
+
+function balancear(lista){
+
+return lista.sort((a,b)=>b.nivel-a.nivel);
 
 }
 
@@ -554,23 +640,18 @@ return a + (Number(j.nivel)||0);
 
 function sortear(){
 
-times = [];
-fila = [];
+times=[];
+fila=[];
 
 /* separa */
 
-let homens = jogadores.filter(
-j=>j.genero==="M"
+let homens = balancear(
+jogadores.filter(j=>j.genero==="M")
 );
 
-let mulheres = jogadores.filter(
-j=>j.genero==="F"
+let mulheres = balancear(
+jogadores.filter(j=>j.genero==="F")
 );
-
-/* embaralha */
-
-homens.sort(()=>Math.random()-0.5);
-mulheres.sort(()=>Math.random()-0.5);
 
 /* qtd */
 
@@ -585,37 +666,28 @@ mulheres.length/2
 
 for(let i=0;i<qtdTimes;i++){
 
-let jogadoresTime = [];
-
-/* homens */
-
-if(homens.length>0){
-jogadoresTime.push(homens.shift());
-}
-
-if(homens.length>0){
-jogadoresTime.push(homens.shift());
-}
-
-/* mulheres */
-
-if(mulheres.length>0){
-jogadoresTime.push(mulheres.shift());
-}
-
-if(mulheres.length>0){
-jogadoresTime.push(mulheres.shift());
-}
-
-/* salva objeto */
-
 times.push({
-
 numero:i+1,
-
-jogadores:jogadoresTime
-
+jogadores:[]
 });
+
+}
+
+/* distribui */
+
+for(let i=0;i<qtdTimes;i++){
+
+if(homens.length>0)
+times[i].jogadores.push(homens.shift());
+
+if(homens.length>0)
+times[i].jogadores.push(homens.shift());
+
+if(mulheres.length>0)
+times[i].jogadores.push(mulheres.shift());
+
+if(mulheres.length>0)
+times[i].jogadores.push(mulheres.shift());
 
 }
 
@@ -628,16 +700,9 @@ fila.push(...mulheres);
 
 /* animação */
 
-window.sortearAnimado = function(){
+window.sortearAnimado=function(){
 
 if(!admin)return;
-
-if(jogadores.length < 4){
-
-alert("Cadastre atletas suficientes");
-return;
-
-}
 
 let tela =
 document.getElementById("animacao");
@@ -647,9 +712,9 @@ document.getElementById("nomeAnimado");
 
 tela.classList.remove("hidden");
 
-let i = 0;
+let i=0;
 
-let intervalo = setInterval(()=>{
+let intervalo=setInterval(()=>{
 
 if(jogadores.length>0){
 
@@ -661,8 +726,6 @@ i++;
 }
 
 },100);
-
-/* final */
 
 setTimeout(async()=>{
 
@@ -676,14 +739,11 @@ await salvar();
 
 render();
 
-}catch(erro){
+}catch(e){
 
-console.error("ERRO:",erro);
+console.error(e);
 
-alert(
-"ERRO:\n\n" +
-erro.message
-);
+alert(e.message);
 
 }
 
@@ -697,14 +757,12 @@ tela.classList.add("hidden");
 
 function render(){
 
-try{
-
 /* lista */
 
 let ul =
 document.getElementById("lista");
 
-ul.innerHTML = "";
+ul.innerHTML="";
 
 jogadores.forEach(j=>{
 
@@ -728,16 +786,42 @@ ${admin
 
 });
 
+/* ranking */
+
+let ranking =
+document.getElementById("ranking");
+
+ranking.innerHTML="";
+
+[...jogadores]
+.sort((a,b)=>b.nivel-a.nivel)
+.forEach((j,i)=>{
+
+ranking.innerHTML += `
+
+<div class="rankItem">
+
+#${i+1}
+-
+${j.nome}
+(N${j.nivel})
+
+</div>
+
+`;
+
+});
+
 /* times */
 
 let div =
 document.getElementById("times");
 
-div.innerHTML = "";
+div.innerHTML="";
 
-times.forEach((timeObj)=>{
+times.forEach(timeObj=>{
 
-let t = timeObj.jogadores;
+let t=timeObj.jogadores;
 
 div.innerHTML += `
 
@@ -747,7 +831,7 @@ div.innerHTML += `
 🏐 TIME ${timeObj.numero}
 </h3>
 
-<p style="margin-bottom:10px;">
+<p>
 ⭐ Nível Total:
 ${soma(t)}
 </p>
@@ -772,9 +856,9 @@ ${j.nome}
 let filaDiv =
 document.getElementById("fila");
 
-filaDiv.innerHTML = `
+filaDiv.innerHTML=`
 <h2 style="margin-bottom:15px;">
-Fila
+🚨 Fila
 </h2>
 `;
 
@@ -801,15 +885,70 @@ ${j.nome}
 
 }
 
+/* estatísticas */
+
+let estat =
+document.getElementById("estatisticas");
+
+estat.innerHTML = `
+
+<p>
+👥 Jogadores:
+${jogadores.length}
+</p>
+
+<p>
+🏐 Times:
+${times.length}
+</p>
+
+<p>
+🚨 Fila:
+${fila.length}
+</p>
+
+`;
+
+/* tv */
+
+let tv =
+document.getElementById("tvConteudo");
+
+tv.innerHTML="";
+
+times.forEach(timeObj=>{
+
+tv.innerHTML += `
+
+<div class="tvTime">
+
+<h2>
+TIME ${timeObj.numero}
+</h2>
+
+<p>
+⭐ ${soma(timeObj.jogadores)}
+</p>
+
+<p>
+${timeObj.jogadores.map(
+j=>j.nome
+).join(" • ")}
+</p>
+
+</div>
+
+`;
+
+});
+
 /* gráfico */
 
 grafico();
 
-}catch(e){
+/* qr */
 
-console.error("ERRO RENDER:",e);
-
-}
+gerarQR();
 
 }
 
@@ -822,14 +961,8 @@ try{
 const canvas =
 document.getElementById("grafico");
 
-if(!canvas)return;
-
 const ctx =
 canvas.getContext("2d");
-
-if(!ctx)return;
-
-/* destrói */
 
 if(window.graficoObj){
 
@@ -837,33 +970,24 @@ window.graficoObj.destroy();
 
 }
 
-/* labels */
-
-const labels = times.map(
-t=>`Time ${t.numero}`
-);
-
-/* dados */
-
-const dados = times.map(
-t=>soma(t.jogadores)
-);
-
-/* cria */
-
-window.graficoObj = new Chart(ctx,{
+window.graficoObj =
+new Chart(ctx,{
 
 type:"bar",
 
 data:{
 
-labels:labels,
+labels:times.map(
+t=>`Time ${t.numero}`
+),
 
 datasets:[{
 
 label:"Nível Total",
 
-data:dados
+data:times.map(
+t=>soma(t.jogadores)
+)
 
 }]
 
@@ -904,7 +1028,7 @@ color:"white"
 
 }catch(e){
 
-console.error("ERRO GRAFICO:",e);
+console.error(e);
 
 }
 
@@ -912,7 +1036,7 @@ console.error("ERRO GRAFICO:",e);
 
 /* exportar */
 
-window.exportarImagem = function(){
+window.exportarImagem=function(){
 
 html2canvas(
 document.getElementById("times")
@@ -921,15 +1045,49 @@ document.getElementById("times")
 let link =
 document.createElement("a");
 
-link.download = "times.png";
+link.download="times.png";
 
-link.href = canvas.toDataURL();
+link.href=canvas.toDataURL();
 
 link.click();
 
 });
 
 };
+
+/* tv */
+
+window.abrirTV=function(){
+
+document
+.getElementById("tv")
+.classList.toggle("hidden");
+
+};
+
+/* qr */
+
+function gerarQR(){
+
+let qrDiv =
+document.getElementById("qr");
+
+qrDiv.innerHTML="";
+
+QRCode.toCanvas(
+window.location.href,
+{
+width:220
+},
+function(error,canvas){
+
+if(error)return;
+
+qrDiv.appendChild(canvas);
+
+});
+
+}
 
 </script>
 
