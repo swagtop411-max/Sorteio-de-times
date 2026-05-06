@@ -8,34 +8,92 @@
 
 <title>M&M VÔLEI PRO</title>
 
+<!-- Bibliotecas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 
 <style>
 
-body{
+*{
 margin:0;
-font-family:Arial;
-background:linear-gradient(135deg,#020617,#0f172a,#1e3a8a);
-color:white;
-text-align:center;
-overflow-x:hidden;
+padding:0;
+box-sizing:border-box;
 }
 
+body{
+font-family:Arial, Helvetica, sans-serif;
+background:linear-gradient(135deg,#020617,#0f172a,#1e3a8a);
+color:white;
+overflow-x:hidden;
+text-align:center;
+}
+
+/* laterais */
+
+.lateral{
+position:fixed;
+top:0;
+height:100%;
+width:320px;
+object-fit:cover;
+opacity:0.95;
+pointer-events:none;
+z-index:0;
+}
+
+.left{
+left:0;
+}
+
+.right{
+right:0;
+}
+
+/* container */
+
 .container{
+position:relative;
+z-index:1;
 max-width:1200px;
 margin:auto;
 padding:20px;
 }
 
+/* cards */
+
 .card{
-background:rgba(0,0,0,0.75);
+background:rgba(0,0,0,0.78);
 padding:20px;
 border-radius:20px;
 margin-bottom:20px;
+backdrop-filter:blur(8px);
+box-shadow:0 0 20px rgba(0,0,0,0.4);
 }
 
-input,select,button{
+/* login */
+
+#loginTela{
+position:fixed;
+inset:0;
+background:rgba(0,0,0,0.95);
+display:flex;
+justify-content:center;
+align-items:center;
+z-index:99999;
+}
+
+.loginBox{
+background:#111827;
+padding:30px;
+border-radius:20px;
+width:320px;
+box-shadow:0 0 25px rgba(0,0,0,0.5);
+}
+
+/* inputs */
+
+input,
+select{
 padding:12px;
 border:none;
 border-radius:10px;
@@ -43,10 +101,43 @@ margin:5px;
 font-size:15px;
 }
 
+/* buttons */
+
 button{
+padding:12px 18px;
+border:none;
+border-radius:10px;
 cursor:pointer;
 font-weight:bold;
+margin:5px;
+font-size:15px;
+transition:0.2s;
 }
+
+button:hover{
+transform:scale(1.03);
+}
+
+/* lista */
+
+ul{
+padding:0;
+}
+
+li{
+list-style:none;
+margin:10px 0;
+}
+
+/* remover */
+
+.removeBtn{
+background:red;
+color:white;
+margin-left:10px;
+}
+
+/* times */
 
 #times{
 display:grid;
@@ -59,6 +150,12 @@ margin-top:20px;
 background:rgba(0,0,0,0.8);
 padding:15px;
 border-radius:18px;
+box-shadow:0 0 15px rgba(0,0,0,0.35);
+}
+
+.time h3{
+color:#60a5fa;
+margin-bottom:10px;
 }
 
 .player{
@@ -68,41 +165,22 @@ margin:6px 0;
 border-radius:8px;
 }
 
-.hidden{
-display:none !important;
-}
+/* animação */
 
-/* login */
-
-#loginTela{
+#animacao{
 position:fixed;
 inset:0;
 background:rgba(0,0,0,0.95);
 display:flex;
 justify-content:center;
 align-items:center;
+flex-direction:column;
+font-size:42px;
 z-index:9999;
 }
 
-.loginBox{
-background:#111827;
-padding:30px;
-border-radius:20px;
-width:320px;
-}
-
-/* animação */
-
-#animacao{
-position:fixed;
-inset:0;
-background:rgba(0,0,0,0.94);
-display:flex;
-justify-content:center;
-align-items:center;
-flex-direction:column;
-font-size:40px;
-z-index:999;
+.hidden{
+display:none !important;
 }
 
 .glow{
@@ -123,25 +201,54 @@ transform:scale(1.1);
 
 }
 
+/* fila */
+
+#fila p{
+margin:8px 0;
+}
+
+/* mobile */
+
+@media(max-width:900px){
+
+.lateral{
+display:none;
+}
+
+input,
+select,
+button{
+width:100%;
+}
+
+}
+
 </style>
 
 </head>
 
 <body>
 
-<!-- LOGIN -->
+<!-- imagens laterais -->
+
+<img src="MeM.jpg" class="lateral left">
+<img src="MeM.jpg" class="lateral right">
+
+<!-- login -->
 
 <div id="loginTela">
 
 <div class="loginBox">
 
-<h2>🏐 M&M VÔLEI PRO</h2>
+<h2 style="margin-bottom:20px;">
+🏐 M&M VÔLEI PRO
+</h2>
 
 <button onclick="entrarVisitante()">
-👤 Visitante
+👤 Entrar como Visitante
 </button>
 
-<hr>
+<hr style="margin:20px 0;">
 
 <input
 type="password"
@@ -150,7 +257,7 @@ placeholder="Senha Admin"
 >
 
 <button onclick="entrarAdmin()">
-👑 Admin
+👑 Entrar como Admin
 </button>
 
 </div>
@@ -171,7 +278,9 @@ placeholder="Senha Admin"
 
 <div class="container">
 
-<h1>🏐 M&M VÔLEI PRO</h1>
+<h1 style="margin-bottom:20px;">
+🏐 M&M VÔLEI PRO
+</h1>
 
 <!-- admin -->
 
@@ -210,7 +319,9 @@ placeholder="Senha Admin"
 
 <div class="card">
 
-<h2>Jogadores</h2>
+<h2 style="margin-bottom:20px;">
+Jogadores
+</h2>
 
 <ul id="lista"></ul>
 
@@ -230,20 +341,28 @@ placeholder="Senha Admin"
 
 <!-- fila -->
 
-<div id="fila" class="card"></div>
+<div id="fila" class="card">
+
+<h2 style="margin-bottom:15px;">
+Fila
+</h2>
+
+</div>
 
 </div>
 
 <script type="module">
 
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
 getFirestore,
 doc,
 setDoc,
 onSnapshot
-} from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* firebase */
 
@@ -267,6 +386,8 @@ const ref=doc(db,"app","dados");
 /* senha */
 
 const SENHA="147580";
+
+/* modo */
 
 let admin=false;
 
@@ -306,7 +427,7 @@ fila
 
 }
 
-/* login */
+/* login visitante */
 
 window.entrarVisitante=function(){
 
@@ -315,6 +436,8 @@ document
 .classList.add("hidden");
 
 };
+
+/* login admin */
 
 window.entrarAdmin=function(){
 
@@ -357,7 +480,23 @@ let nivel=parseInt(
 document.getElementById("nivel").value
 );
 
-if(nome==="")return;
+if(nome===""){
+
+alert("Digite um nome");
+return;
+
+}
+
+let existe=jogadores.some(j=>
+j.nome.toLowerCase()===nome.toLowerCase()
+);
+
+if(existe){
+
+alert("Jogador já cadastrado");
+return;
+
+}
 
 jogadores.push({
 nome,
@@ -368,14 +507,27 @@ nivel
 await salvar();
 
 document.getElementById("nome").value="";
+document.getElementById("nome").focus();
+
+};
+
+/* remover */
+
+window.removerJogador=async function(nome){
+
+if(!admin)return;
+
+jogadores=jogadores.filter(
+j=>j.nome!==nome
+);
+
+await salvar();
 
 };
 
 /* soma */
 
 function soma(time){
-
-if(!time)return 0;
 
 return time.reduce(
 (a,j)=>a+(j.nivel || 0),
@@ -391,45 +543,61 @@ function sortear(){
 times=[];
 fila=[];
 
+/* separa */
+
 let homens=[...jogadores]
 .filter(j=>j.genero==="M");
 
 let mulheres=[...jogadores]
 .filter(j=>j.genero==="F");
 
-let qtd=Math.floor(
-Math.min(homens.length/2,mulheres.length/2)
+/* embaralha */
+
+homens.sort(()=>Math.random()-0.5);
+mulheres.sort(()=>Math.random()-0.5);
+
+/* quantidade de times */
+
+let qtdTimes=Math.floor(
+Math.min(
+homens.length/2,
+mulheres.length/2
+)
 );
 
-if(qtd<=0){
+/* cria */
 
-alert("Atletas insuficientes");
+for(let i=0;i<qtdTimes;i++){
 
-return;
+let time=[];
+
+/* 2 homens */
+
+if(homens.length>0){
+time.push(homens.shift());
+}
+
+if(homens.length>0){
+time.push(homens.shift());
+}
+
+/* 2 mulheres */
+
+if(mulheres.length>0){
+time.push(mulheres.shift());
+}
+
+if(mulheres.length>0){
+time.push(mulheres.shift());
+}
+
+/* adiciona */
+
+times.push(time);
 
 }
 
-/* criar times */
-
-for(let i=0;i<qtd;i++){
-
-times.push([]);
-
-}
-
-/* distribuir */
-
-for(let i=0;i<qtd;i++){
-
-if(homens[0])times[i].push(homens.shift());
-if(homens[0])times[i].push(homens.shift());
-
-if(mulheres[0])times[i].push(mulheres.shift());
-if(mulheres[0])times[i].push(mulheres.shift());
-
-}
-
-/* fila */
+/* sobra vai fila */
 
 fila.push(...homens);
 fila.push(...mulheres);
@@ -439,6 +607,16 @@ fila.push(...mulheres);
 /* animação */
 
 window.sortearAnimado=function(){
+
+if(!admin)return;
+
+if(jogadores.length<4){
+
+alert("Cadastre atletas suficientes.");
+
+return;
+
+}
 
 let tela=document.getElementById("animacao");
 
@@ -473,9 +651,9 @@ await salvar();
 
 render();
 
-}catch(e){
+}catch(erro){
 
-console.error(e);
+console.error(erro);
 
 alert("Erro no sorteio");
 
@@ -500,9 +678,21 @@ ul.innerHTML="";
 jogadores.forEach(j=>{
 
 ul.innerHTML+=`
+
 <li>
-${j.nome} (${j.genero} N${j.nivel})
+
+${j.nome}
+(${j.genero} N${j.nivel})
+
+${admin
+?
+`<button class="removeBtn" onclick="removerJogador('${j.nome}')">❌</button>`
+:
+""
+}
+
 </li>
+
 `;
 
 });
@@ -523,17 +713,16 @@ div.innerHTML+=`
 🏐 TIME ${i+1}
 </h3>
 
-<p>
-⭐ Nível:
+<p style="margin-bottom:10px;">
+⭐ Nível Total:
 ${soma(t)}
 </p>
-
-<hr>
 
 ${t.map(j=>`
 
 <div class="player">
-${j.nome} (${j.genero} N${j.nivel})
+${j.nome}
+(${j.genero} N${j.nivel})
 </div>
 
 `).join("")}
@@ -549,18 +738,33 @@ ${j.nome} (${j.genero} N${j.nivel})
 let filaDiv=document.getElementById("fila");
 
 filaDiv.innerHTML=`
-<h2>Fila</h2>
+<h2 style="margin-bottom:15px;">
+Fila
+</h2>
 `;
+
+if(fila.length===0){
+
+filaDiv.innerHTML+=`
+<p>
+Nenhum atleta na fila
+</p>
+`;
+
+}else{
 
 fila.forEach(j=>{
 
 filaDiv.innerHTML+=`
 <p>
-${j.nome} (${j.genero} N${j.nivel})
+${j.nome}
+(${j.genero} N${j.nivel})
 </p>
 `;
 
 });
+
+}
 
 /* gráfico */
 
