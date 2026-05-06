@@ -6,61 +6,36 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SISTEMA INTELIGENTE DE SORTEIO</title>
+<title>M&M VÔLEI PRO</title>
 
-<!-- bibliotecas -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
 
 <style>
 
 body{
 margin:0;
-font-family:Arial, Helvetica, sans-serif;
+font-family:Arial;
 background:linear-gradient(135deg,#020617,#0f172a,#1e3a8a);
 color:white;
-overflow-x:hidden;
 text-align:center;
+overflow-x:hidden;
 }
 
-/* laterais */
-.lateral{
-position:fixed;
-top:0;
-height:100%;
-width:260px;
-object-fit:cover;
-z-index:0;
-opacity:0.95;
-pointer-events:none;
-}
-
-.left{left:0;}
-.right{right:0;}
-
-/* container */
 .container{
 max-width:1200px;
 margin:auto;
 padding:20px;
-position:relative;
-z-index:1;
 }
 
-/* cards */
 .card{
 background:rgba(0,0,0,0.75);
 padding:20px;
-border-radius:18px;
+border-radius:20px;
 margin-bottom:20px;
-backdrop-filter:blur(8px);
-box-shadow:0 0 20px rgba(0,0,0,0.35);
 }
 
-/* inputs */
-input,select{
+input,select,button{
 padding:12px;
 border:none;
 border-radius:10px;
@@ -68,23 +43,11 @@ margin:5px;
 font-size:15px;
 }
 
-/* buttons */
 button{
-padding:12px 18px;
-border:none;
-border-radius:10px;
 cursor:pointer;
 font-weight:bold;
-margin:5px;
-transition:0.2s;
-font-size:15px;
 }
 
-button:hover{
-transform:scale(1.03);
-}
-
-/* times */
 #times{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
@@ -93,32 +56,24 @@ margin-top:20px;
 }
 
 .time{
-background:rgba(0,0,0,0.78);
+background:rgba(0,0,0,0.8);
 padding:15px;
 border-radius:18px;
-box-shadow:0 0 15px rgba(0,0,0,0.35);
-border:1px solid rgba(255,255,255,0.08);
 }
 
-.time h3{
-color:#60a5fa;
-}
-
-/* players */
 .player{
 background:rgba(255,255,255,0.08);
 padding:8px;
-border-radius:8px;
 margin:6px 0;
-cursor:grab;
+border-radius:8px;
 }
 
-/* hidden */
 .hidden{
 display:none !important;
 }
 
 /* login */
+
 #loginTela{
 position:fixed;
 inset:0;
@@ -126,7 +81,7 @@ background:rgba(0,0,0,0.95);
 display:flex;
 justify-content:center;
 align-items:center;
-z-index:99999;
+z-index:9999;
 }
 
 .loginBox{
@@ -134,10 +89,10 @@ background:#111827;
 padding:30px;
 border-radius:20px;
 width:320px;
-box-shadow:0 0 25px rgba(0,0,0,0.5);
 }
 
 /* animação */
+
 #animacao{
 position:fixed;
 inset:0;
@@ -146,8 +101,8 @@ display:flex;
 justify-content:center;
 align-items:center;
 flex-direction:column;
-z-index:9999;
 font-size:40px;
+z-index:999;
 }
 
 .glow{
@@ -168,54 +123,6 @@ transform:scale(1.1);
 
 }
 
-/* qr */
-#qr{
-display:flex;
-justify-content:center;
-margin-top:20px;
-}
-
-/* tv */
-#tvPanel{
-background:black;
-padding:20px;
-border-radius:20px;
-margin-top:20px;
-}
-
-/* lista */
-ul{
-padding:0;
-}
-
-li{
-list-style:none;
-margin:8px 0;
-}
-
-/* remove */
-.removeBtn{
-background:red;
-color:white;
-margin-left:10px;
-}
-
-/* mobile */
-@media(max-width:900px){
-
-.lateral{
-display:none;
-}
-
-button,
-input,
-select{
-width:100%;
-box-sizing:border-box;
-}
-
-}
-
 </style>
 
 </head>
@@ -223,6 +130,7 @@ box-sizing:border-box;
 <body>
 
 <!-- LOGIN -->
+
 <div id="loginTela">
 
 <div class="loginBox">
@@ -230,7 +138,7 @@ box-sizing:border-box;
 <h2>🏐 M&M VÔLEI PRO</h2>
 
 <button onclick="entrarVisitante()">
-👤 Entrar como Visitante
+👤 Visitante
 </button>
 
 <hr>
@@ -242,18 +150,15 @@ placeholder="Senha Admin"
 >
 
 <button onclick="entrarAdmin()">
-👑 Entrar como Admin
+👑 Admin
 </button>
 
 </div>
 
 </div>
 
-<!-- imagens -->
-<img src="MeM.jpg" class="lateral left">
-<img src="MeM.jpg" class="lateral right">
-
 <!-- animação -->
+
 <div id="animacao" class="hidden">
 
 <div class="glow">
@@ -268,7 +173,8 @@ placeholder="Senha Admin"
 
 <h1>🏐 M&M VÔLEI PRO</h1>
 
-<!-- ADMIN -->
+<!-- admin -->
+
 <div id="adminArea" class="card hidden">
 
 <input id="nome" placeholder="Nome do atleta">
@@ -291,7 +197,7 @@ placeholder="Senha Admin"
 </button>
 
 <button onclick="sortearAnimado()">
-🎲 Sorteio Animado
+🎲 Sortear
 </button>
 
 <button onclick="exportarImagem()">
@@ -301,6 +207,7 @@ placeholder="Senha Admin"
 </div>
 
 <!-- jogadores -->
+
 <div class="card">
 
 <h2>Jogadores</h2>
@@ -310,42 +217,23 @@ placeholder="Senha Admin"
 </div>
 
 <!-- gráfico -->
+
 <div class="card">
 
 <canvas id="grafico"></canvas>
 
 </div>
 
-<!-- estatísticas -->
-<div id="estatisticas" class="card"></div>
-
 <!-- times -->
+
 <div id="times"></div>
 
 <!-- fila -->
+
 <div id="fila" class="card"></div>
 
-<!-- qr -->
-<div class="card">
-
-<h2>QR Code do App</h2>
-
-<div id="qr"></div>
-
 </div>
 
-<!-- tv -->
-<div id="tvPanel">
-
-<h2>📺 Painel TV / OBS</h2>
-
-<div id="tvConteudo"></div>
-
-</div>
-
-</div>
-
-<!-- firebase -->
 <script type="module">
 
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
@@ -358,6 +246,7 @@ onSnapshot
 } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 /* firebase */
+
 const firebaseConfig = {
 
 apiKey: "AIzaSyDNBTUXydUU8gxdteO4_dwQn65WpLGoRV4",
@@ -365,8 +254,7 @@ authDomain: "sorteio-de-times-aleatorios.firebaseapp.com",
 projectId: "sorteio-de-times-aleatorios",
 storageBucket: "sorteio-de-times-aleatorios.firebasestorage.app",
 messagingSenderId: "169025334598",
-appId: "1:169025334598:web:dcae7c136755b4f0d80947",
-measurementId: "G-HC4H5DK7DD"
+appId: "1:169025334598:web:dcae7c136755b4f0d80947"
 
 };
 
@@ -377,17 +265,19 @@ const db=getFirestore(appFirebase);
 const ref=doc(db,"app","dados");
 
 /* senha */
+
 const SENHA="147580";
 
-/* modo */
 let admin=false;
 
 /* dados */
+
 let jogadores=[];
 let times=[];
 let fila=[];
 
 /* realtime */
+
 onSnapshot(ref,(snapshot)=>{
 
 if(snapshot.exists()){
@@ -405,6 +295,7 @@ render();
 });
 
 /* salvar */
+
 async function salvar(){
 
 await setDoc(ref,{
@@ -415,23 +306,20 @@ fila
 
 }
 
-/* login visitante */
+/* login */
+
 window.entrarVisitante=function(){
 
 document
 .getElementById("loginTela")
 .classList.add("hidden");
 
-render();
-
 };
 
-/* login admin */
 window.entrarAdmin=function(){
 
-let senha=document
-.getElementById("senhaAdmin")
-.value;
+let senha=
+document.getElementById("senhaAdmin").value;
 
 if(senha===SENHA){
 
@@ -445,8 +333,6 @@ document
 .getElementById("adminArea")
 .classList.remove("hidden");
 
-render();
-
 }else{
 
 alert("Senha incorreta");
@@ -456,37 +342,22 @@ alert("Senha incorreta");
 };
 
 /* add */
-window.add = async function(){
 
-if(!admin){
-return;
-}
+window.add=async function(){
 
-let nome=document.getElementById("nome").value.trim();
+if(!admin)return;
 
-let genero=document.getElementById("genero").value;
+let nome=
+document.getElementById("nome").value.trim();
+
+let genero=
+document.getElementById("genero").value;
 
 let nivel=parseInt(
 document.getElementById("nivel").value
 );
 
-if(nome===""){
-
-alert("Digite um nome");
-return;
-
-}
-
-let existe=jogadores.some(j=>
-j.nome.toLowerCase()===nome.toLowerCase()
-);
-
-if(existe){
-
-alert("Jogador já cadastrado");
-return;
-
-}
+if(nome==="")return;
 
 jogadores.push({
 nome,
@@ -497,57 +368,77 @@ nivel
 await salvar();
 
 document.getElementById("nome").value="";
-document.getElementById("nome").focus();
-
-};
-
-/* remover */
-window.removerJogador = async function(nome){
-
-if(!admin){
-return;
-}
-
-jogadores=jogadores.filter(
-j=>j.nome!==nome
-);
-
-await salvar();
 
 };
 
 /* soma */
+
 function soma(time){
 
+if(!time)return 0;
+
 return time.reduce(
-(a,j)=>a+j.nivel,
+(a,j)=>a+(j.nivel || 0),
 0
 );
 
 }
 
-/* sorteio animado */
-window.sortearAnimado = async function(){
+/* sorteio */
 
-if(!admin){
+function sortear(){
+
+times=[];
+fila=[];
+
+let homens=[...jogadores]
+.filter(j=>j.genero==="M");
+
+let mulheres=[...jogadores]
+.filter(j=>j.genero==="F");
+
+let qtd=Math.floor(
+Math.min(homens.length/2,mulheres.length/2)
+);
+
+if(qtd<=0){
+
+alert("Atletas insuficientes");
+
 return;
+
 }
 
-let homens=jogadores.filter(
-j=>j.genero==="M"
-).length;
+/* criar times */
 
-let mulheres=jogadores.filter(
-j=>j.genero==="F"
-).length;
+for(let i=0;i<qtd;i++){
 
-if(homens<2 || mulheres<2){
-
-alert("Necessário 2 homens e 2 mulheres.");
-
-return;
+times.push([]);
 
 }
+
+/* distribuir */
+
+for(let i=0;i<qtd;i++){
+
+if(homens[0])times[i].push(homens.shift());
+if(homens[0])times[i].push(homens.shift());
+
+if(mulheres[0])times[i].push(mulheres.shift());
+if(mulheres[0])times[i].push(mulheres.shift());
+
+}
+
+/* fila */
+
+fila.push(...homens);
+fila.push(...mulheres);
+
+}
+
+/* animação */
+
+window.sortearAnimado=function(){
 
 let tela=document.getElementById("animacao");
 
@@ -582,129 +473,26 @@ await salvar();
 
 render();
 
-}catch(erro){
+}catch(e){
 
-console.error(erro);
+console.error(e);
 
-alert("Erro no sorteio.");
-
-}finally{
-
-tela.classList.add("hidden");
+alert("Erro no sorteio");
 
 }
+
+tela.classList.add("hidden");
 
 },3000);
 
 };
 
-/* sorteio */
-function sortear(){
-
-times=[];
-fila=[];
-
-let homens=[...jogadores]
-.filter(j=>j.genero==="M")
-.sort((a,b)=>b.nivel-a.nivel);
-
-let mulheres=[...jogadores]
-.filter(j=>j.genero==="F")
-.sort((a,b)=>b.nivel-a.nivel);
-
-let qtd=Math.floor(
-Math.min(
-homens.length/2,
-mulheres.length/2
-)
-);
-
-for(let i=0;i<qtd;i++){
-
-times.push([]);
-
-}
-
-function encaixar(lista,genero){
-
-lista.forEach(j=>{
-
-let melhor=null;
-let menor=999;
-
-times.forEach(t=>{
-
-let qtdGenero=t.filter(
-a=>a.genero===genero
-).length;
-
-let total=soma(t);
-
-if(
-qtdGenero<2 &&
-(total+j.nivel)<=12
-){
-
-if(total<menor){
-
-menor=total;
-melhor=t;
-
-}
-
-}
-
-});
-
-if(melhor){
-
-melhor.push(j);
-
-}else{
-
-fila.push(j);
-
-}
-
-});
-
-}
-
-encaixar(homens,"M");
-encaixar(mulheres,"F");
-
-let completos=[];
-
-times.forEach(t=>{
-
-let h=t.filter(
-j=>j.genero==="M"
-).length;
-
-let m=t.filter(
-j=>j.genero==="F"
-).length;
-
-if(h===2 && m===2){
-
-completos.push(t);
-
-}else{
-
-fila.push(...t);
-
-}
-
-});
-
-times=completos;
-
-}
-
 /* render */
+
 function render(){
 
 /* lista */
+
 let ul=document.getElementById("lista");
 
 ul.innerHTML="";
@@ -713,117 +501,56 @@ jogadores.forEach(j=>{
 
 ul.innerHTML+=`
 <li>
-
 ${j.nome} (${j.genero} N${j.nivel})
-
-${admin
-?
-`<button class="removeBtn" onclick="removerJogador('${j.nome}')">❌</button>`
-:
-""
-}
-
 </li>
 `;
 
 });
 
 /* times */
+
 let div=document.getElementById("times");
 
 div.innerHTML="";
 
-let media=
-times.reduce((a,t)=>a+soma(t),0)
-/ Math.max(times.length,1);
-
 times.forEach((t,i)=>{
 
-let equilibrio=
-100-Math.abs(soma(t)-media)*8;
+div.innerHTML+=`
 
-if(equilibrio<0){
-equilibrio=0;
-}
-
-let html=`
 <div class="time">
 
-<h3>🏐 TIME ${i+1}</h3>
+<h3>
+🏐 TIME ${i+1}
+</h3>
 
 <p>
 ⭐ Nível:
-${soma(t)}/12
-</p>
-
-<p>
-⚖️ Equilíbrio:
-${equilibrio.toFixed(0)}%
+${soma(t)}
 </p>
 
 <hr>
 
-<div class="sortable" id="time${i}">
-`;
+${t.map(j=>`
 
-t.forEach(j=>{
-
-html+=`
 <div class="player">
 ${j.nome} (${j.genero} N${j.nivel})
 </div>
+
+`).join("")}
+
+</div>
+
 `;
 
 });
-
-html+=`
-</div>
-</div>
-`;
-
-div.innerHTML+=html;
-
-});
-
-/* drag */
-if(admin){
-
-setTimeout(()=>{
-
-for(let i=0;i<times.length;i++){
-
-let elemento=
-document.getElementById(`time${i}`);
-
-if(elemento){
-
-new Sortable(elemento,{
-group:"times",
-animation:150
-});
-
-}
-
-}
-
-},100);
-
-}
 
 /* fila */
+
 let filaDiv=document.getElementById("fila");
 
 filaDiv.innerHTML=`
 <h2>Fila</h2>
 `;
-
-if(fila.length===0){
-
-filaDiv.innerHTML+=`
-<p>Nenhum atleta na fila</p>
-`;
-
-}else{
 
 fila.forEach(j=>{
 
@@ -835,52 +562,21 @@ ${j.nome} (${j.genero} N${j.nivel})
 
 });
 
-}
-
-/* estatísticas */
-estatisticas();
-
 /* gráfico */
+
 grafico();
 
-/* qr */
-gerarQR();
-
-/* tv */
-painelTV();
-
-}
-
-/* estatísticas */
-function estatisticas(){
-
-let div=document.getElementById("estatisticas");
-
-div.innerHTML=`
-<h2>📊 Estatísticas</h2>
-
-<p>
-Jogadores cadastrados:
-${jogadores.length}
-</p>
-
-<p>
-Times montados:
-${times.length}
-</p>
-
-<p>
-Atletas na fila:
-${fila.length}
-</p>
-`;
-
 }
 
 /* gráfico */
+
 function grafico(){
 
-let ctx=document.getElementById("grafico");
+const canvas=document.getElementById("grafico");
+
+if(!canvas)return;
+
+const ctx=canvas.getContext("2d");
 
 if(window.graficoObj){
 
@@ -902,9 +598,7 @@ datasets:[{
 
 label:"Nível Total",
 
-data:times.map(
-t=>soma(t)
-)
+data:times.map(t=>soma(t))
 
 }]
 
@@ -932,7 +626,6 @@ color:"white"
 
 y:{
 beginAtZero:true,
-max:12,
 ticks:{
 color:"white"
 }
@@ -947,6 +640,7 @@ color:"white"
 }
 
 /* exportar */
+
 window.exportarImagem=function(){
 
 html2canvas(
@@ -964,55 +658,6 @@ link.click();
 });
 
 };
-
-/* qr */
-function gerarQR(){
-
-let qr=document.getElementById("qr");
-
-qr.innerHTML="";
-
-QRCode.toCanvas(
-window.location.href,
-function(error,canvas){
-
-if(error){
-return;
-}
-
-qr.appendChild(canvas);
-
-}
-);
-
-}
-
-/* tv */
-function painelTV(){
-
-let tv=document.getElementById("tvConteudo");
-
-tv.innerHTML="";
-
-times.forEach((t,i)=>{
-
-tv.innerHTML+=`
-<div>
-
-<h3>
-TIME ${i+1}
-</h3>
-
-<p>
-${t.map(a=>a.nome).join(" • ")}
-</p>
-
-</div>
-`;
-
-});
-
-}
 
 </script>
 
