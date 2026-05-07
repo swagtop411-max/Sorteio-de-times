@@ -6,9 +6,9 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>SISTEMA INTELIGENTE DE SORTEIO</title>
+<title>M&M VÔLEI PRO</title>
 
-<!-- libs -->
+<!-- LIBS -->
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
@@ -120,6 +120,23 @@ button:hover{
 transform:scale(1.03);
 }
 
+/* especiais */
+
+.resetBtn{
+background:#dc2626;
+color:white;
+}
+
+.exportBtn{
+background:#16a34a;
+color:white;
+}
+
+.sortBtn{
+background:#2563eb;
+color:white;
+}
+
 /* lista */
 
 ul{
@@ -167,7 +184,6 @@ background:rgba(255,255,255,0.08);
 padding:10px;
 margin:8px 0;
 border-radius:10px;
-cursor:grab;
 }
 
 /* animação */
@@ -204,12 +220,6 @@ opacity:1;
 transform:scale(1.1);
 }
 
-}
-
-/* fila */
-
-#fila p{
-margin:8px 0;
 }
 
 /* tv */
@@ -270,14 +280,14 @@ width:100%;
 <img src="MeM.jpg" class="lateral left">
 <img src="MeM.jpg" class="lateral right">
 
-<!-- login -->
+<!-- LOGIN -->
 
 <div id="loginTela">
 
 <div class="loginBox">
 
 <h2 style="margin-bottom:20px;">
-🏐 M&M 🏐  SISTEMA INTELIGENTE DE SORTEIO
+🏐 M&M VÔLEI PRO
 </h2>
 
 <button onclick="entrarVisitante()">
@@ -315,7 +325,7 @@ placeholder="Senha Admin"
 <div class="container">
 
 <h1>
-🏐 M&M 🏐  SISTEMA INTELIGENTE DE SORTEIO
+🏐 M&M VÔLEI PRO
 </h1>
 
 <!-- admin -->
@@ -341,16 +351,20 @@ placeholder="Senha Admin"
 ➕ Adicionar
 </button>
 
-<button onclick="sortearAnimado()">
+<button class="sortBtn" onclick="sortearAnimado()">
 🎲 Sortear
 </button>
 
-<button onclick="exportarImagem()">
+<button class="exportBtn" onclick="exportarImagem()">
 📸 Exportar
 </button>
 
 <button onclick="abrirTV()">
 📺 TV
+</button>
+
+<button class="resetBtn" onclick="resetarSorteio()">
+♻️ Resetar Sorteio
 </button>
 
 </div>
@@ -446,7 +460,7 @@ onSnapshot
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
-/* firebase */
+/* FIREBASE */
 
 const firebaseConfig = {
 
@@ -614,6 +628,29 @@ await salvar();
 
 };
 
+/* RESETAR */
+
+window.resetarSorteio = async function(){
+
+if(!admin)return;
+
+let confirmar = confirm(
+"Resetar todos os sorteios?\n\nOs jogadores continuarão cadastrados."
+);
+
+if(!confirmar)return;
+
+times = [];
+fila = [];
+
+await salvar();
+
+render();
+
+alert("Sorteio resetado com sucesso.");
+
+};
+
 /* soma */
 
 function soma(lista){
@@ -628,14 +665,6 @@ return a+(Number(j.nivel)||0);
 
 }
 
-/* balanceamento */
-
-function balancear(lista){
-
-return lista.sort((a,b)=>b.nivel-a.nivel);
-
-}
-
 /* sorteio */
 
 function sortear(){
@@ -643,17 +672,16 @@ function sortear(){
 times=[];
 fila=[];
 
-/* separa */
-
-let homens = balancear(
-jogadores.filter(j=>j.genero==="M")
+let homens = jogadores.filter(
+j=>j.genero==="M"
 );
 
-let mulheres = balancear(
-jogadores.filter(j=>j.genero==="F")
+let mulheres = jogadores.filter(
+j=>j.genero==="F"
 );
 
-/* qtd */
+homens.sort(()=>Math.random()-0.5);
+mulheres.sort(()=>Math.random()-0.5);
 
 let qtdTimes = Math.floor(
 Math.min(
@@ -661,8 +689,6 @@ homens.length/2,
 mulheres.length/2
 )
 );
-
-/* cria */
 
 for(let i=0;i<qtdTimes;i++){
 
@@ -673,8 +699,6 @@ jogadores:[]
 
 }
 
-/* distribui */
-
 for(let i=0;i<qtdTimes;i++){
 
 if(homens.length>0)
@@ -690,8 +714,6 @@ if(mulheres.length>0)
 times[i].jogadores.push(mulheres.shift());
 
 }
-
-/* sobra */
 
 fila.push(...homens);
 fila.push(...mulheres);
@@ -942,11 +964,7 @@ j=>j.nome
 
 });
 
-/* gráfico */
-
 grafico();
-
-/* qr */
 
 gerarQR();
 
