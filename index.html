@@ -619,47 +619,7 @@ document.getElementById("nome").value="";
 
 };
 
-/* REMOVER ATLETA */
-
-window.removerJogador = async function(nome){
-
-if(!admin)return;
-
-let confirmar = confirm(
-"Excluir atleta?\n\n" + nome
-);
-
-if(!confirmar)return;
-
-/* remove cadastro */
-
-jogadores = jogadores.filter(
-j=>j.nome !== nome
-);
-
-/* remove dos times */
-
-times.forEach(time=>{
-
-time.jogadores = time.jogadores.filter(
-j=>j.nome !== nome
-);
-
-});
-
-/* remove fila */
-
-fila = fila.filter(
-j=>j.nome !== nome
-);
-
-await salvar();
-
-render();
-
-};
-
-/* RESETAR */
+/* resetar */
 
 window.resetarSorteio = async function(){
 
@@ -828,7 +788,9 @@ ${j.nome}
 
 ${admin
 ?
-`<button class="removeBtn" onclick="removerJogador('${j.nome}')">❌ Excluir</button>`
+`<button class="removeBtn" data-nome="${j.nome}">
+❌ Excluir
+</button>`
 :
 ""
 }
@@ -836,6 +798,56 @@ ${admin
 </li>
 
 `;
+
+});
+
+/* remover mobile */
+
+document
+.querySelectorAll(".removeBtn")
+.forEach(btn=>{
+
+btn.addEventListener("click",async()=>{
+
+if(!admin)return;
+
+let nome =
+btn.dataset.nome;
+
+let confirmar = confirm(
+"Excluir atleta?\n\n" + nome
+);
+
+if(!confirmar)return;
+
+/* remove cadastro */
+
+jogadores = jogadores.filter(
+j=>j.nome !== nome
+);
+
+/* remove dos times */
+
+times.forEach(time=>{
+
+time.jogadores =
+time.jogadores.filter(
+j=>j.nome !== nome
+);
+
+});
+
+/* remove fila */
+
+fila = fila.filter(
+j=>j.nome !== nome
+);
+
+await salvar();
+
+render();
+
+});
 
 });
 
@@ -872,273 +884,4 @@ document.getElementById("times");
 
 div.innerHTML="";
 
-times.forEach(timeObj=>{
-
-let t=timeObj.jogadores;
-
-div.innerHTML += `
-
-<div class="time">
-
-<h3>
-🏐 TIME ${timeObj.numero}
-</h3>
-
-<p>
-⭐ Nível Total:
-${soma(t)}
-</p>
-
-${t.map(j=>`
-
-<div class="player">
-${j.nome}
-(${j.genero} N${j.nivel})
-</div>
-
-`).join("")}
-
-</div>
-
-`;
-
-});
-
-/* fila */
-
-let filaDiv =
-document.getElementById("fila");
-
-filaDiv.innerHTML=`
-<h2 style="margin-bottom:15px;">
-🚨 Fila
-</h2>
-`;
-
-if(fila.length===0){
-
-filaDiv.innerHTML += `
-<p>
-Nenhum atleta na fila
-</p>
-`;
-
-}else{
-
-fila.forEach(j=>{
-
-filaDiv.innerHTML += `
-<p>
-${j.nome}
-(${j.genero} N${j.nivel})
-</p>
-`;
-
-});
-
-}
-
-/* estatísticas */
-
-let estat =
-document.getElementById("estatisticas");
-
-estat.innerHTML = `
-
-<p>
-👥 Jogadores:
-${jogadores.length}
-</p>
-
-<p>
-🏐 Times:
-${times.length}
-</p>
-
-<p>
-🚨 Fila:
-${fila.length}
-</p>
-
-`;
-
-/* tv */
-
-let tv =
-document.getElementById("tvConteudo");
-
-tv.innerHTML="";
-
-times.forEach(timeObj=>{
-
-tv.innerHTML += `
-
-<div class="tvTime">
-
-<h2>
-TIME ${timeObj.numero}
-</h2>
-
-<p>
-⭐ ${soma(timeObj.jogadores)}
-</p>
-
-<p>
-${timeObj.jogadores.map(
-j=>j.nome
-).join(" • ")}
-</p>
-
-</div>
-
-`;
-
-});
-
-grafico();
-
-gerarQR();
-
-}
-
-/* gráfico */
-
-function grafico(){
-
-try{
-
-const canvas =
-document.getElementById("grafico");
-
-const ctx =
-canvas.getContext("2d");
-
-if(window.graficoObj){
-
-window.graficoObj.destroy();
-
-}
-
-window.graficoObj =
-new Chart(ctx,{
-
-type:"bar",
-
-data:{
-
-labels:times.map(
-t=>`Time ${t.numero}`
-),
-
-datasets:[{
-
-label:"Nível Total",
-
-data:times.map(
-t=>soma(t.jogadores)
-)
-
-}]
-
-},
-
-options:{
-
-responsive:true,
-
-plugins:{
-legend:{
-labels:{
-color:"white"
-}
-}
-},
-
-scales:{
-
-x:{
-ticks:{
-color:"white"
-}
-},
-
-y:{
-beginAtZero:true,
-ticks:{
-color:"white"
-}
-}
-
-}
-
-}
-
-});
-
-}catch(e){
-
-console.error(e);
-
-}
-
-}
-
-/* exportar */
-
-window.exportarImagem=function(){
-
-html2canvas(
-document.getElementById("times")
-).then(canvas=>{
-
-let link =
-document.createElement("a");
-
-link.download="times.png";
-
-link.href=canvas.toDataURL();
-
-link.click();
-
-});
-
-};
-
-/* tv */
-
-window.abrirTV=function(){
-
-document
-.getElementById("tv")
-.classList.toggle("hidden");
-
-};
-
-/* qr */
-
-function gerarQR(){
-
-let qrDiv =
-document.getElementById("qr");
-
-qrDiv.innerHTML="";
-
-QRCode.toCanvas(
-window.location.href,
-{
-width:220
-},
-function(error,canvas){
-
-if(error)return;
-
-qrDiv.appendChild(canvas);
-
-});
-
-}
-
-</script>
-
-</body>
-</html>
+times.forEach(timeObj=>
