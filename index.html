@@ -137,6 +137,14 @@ background:#2563eb;
 color:white;
 }
 
+.removeBtn{
+background:#ef4444;
+color:white;
+padding:6px 10px;
+font-size:12px;
+margin-left:10px;
+}
+
 /* lista */
 
 ul{
@@ -146,14 +154,9 @@ padding:0;
 li{
 list-style:none;
 margin:10px 0;
-}
-
-/* remover */
-
-.removeBtn{
-background:red;
-color:white;
-margin-left:10px;
+background:rgba(255,255,255,0.05);
+padding:10px;
+border-radius:10px;
 }
 
 /* times */
@@ -564,6 +567,8 @@ document
 .getElementById("adminArea")
 .classList.remove("hidden");
 
+render();
+
 }else{
 
 alert("Senha incorreta");
@@ -614,17 +619,43 @@ document.getElementById("nome").value="";
 
 };
 
-/* remover */
+/* REMOVER ATLETA */
 
-window.removerJogador=async function(nome){
+window.removerJogador = async function(nome){
 
 if(!admin)return;
 
-jogadores=jogadores.filter(
-j=>j.nome!==nome
+let confirmar = confirm(
+"Excluir atleta?\n\n" + nome
+);
+
+if(!confirmar)return;
+
+/* remove cadastro */
+
+jogadores = jogadores.filter(
+j=>j.nome !== nome
+);
+
+/* remove dos times */
+
+times.forEach(time=>{
+
+time.jogadores = time.jogadores.filter(
+j=>j.nome !== nome
+);
+
+});
+
+/* remove fila */
+
+fila = fila.filter(
+j=>j.nome !== nome
 );
 
 await salvar();
+
+render();
 
 };
 
@@ -635,7 +666,7 @@ window.resetarSorteio = async function(){
 if(!admin)return;
 
 let confirmar = confirm(
-"Resetar todos os sorteios?\n\nOs jogadores continuarão cadastrados."
+"Resetar todos os sorteios?\n\nOs atletas continuarão cadastrados."
 );
 
 if(!confirmar)return;
@@ -647,7 +678,7 @@ await salvar();
 
 render();
 
-alert("Sorteio resetado com sucesso.");
+alert("Sorteio resetado.");
 
 };
 
@@ -797,7 +828,7 @@ ${j.nome}
 
 ${admin
 ?
-`<button class="removeBtn" onclick="removerJogador('${j.nome}')">❌</button>`
+`<button class="removeBtn" onclick="removerJogador('${j.nome}')">❌ Excluir</button>`
 :
 ""
 }
