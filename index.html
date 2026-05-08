@@ -35,7 +35,7 @@ overflow-x:hidden;
 text-align:center;
 }
 
-/* laterais premium */
+/* laterais */
 
 .lateral{
 position:fixed;
@@ -354,7 +354,7 @@ font-size:34px;
 🏐 M&M VÔLEI PRO
 </h2>
 
-<button onclick="entrarVisitante()">
+<button id="btnVisitante">
 👤 Entrar Visitante
 </button>
 
@@ -366,7 +366,7 @@ id="senhaAdmin"
 placeholder="Senha Admin"
 >
 
-<button onclick="entrarAdmin()">
+<button id="btnAdmin">
 👑 Entrar Admin
 </button>
 
@@ -411,23 +411,23 @@ placeholder="Senha Admin"
 <option value="5">N5</option>
 </select>
 
-<button onclick="add()">
+<button id="btnAdd">
 ➕ Adicionar
 </button>
 
-<button class="sortBtn" onclick="sortearAnimado()">
+<button class="sortBtn" id="btnSortear">
 🎲 Sortear
 </button>
 
-<button class="exportBtn" onclick="exportarImagem()">
+<button class="exportBtn" id="btnExportar">
 📸 Exportar
 </button>
 
-<button onclick="abrirTV()">
+<button id="btnTV">
 📺 TV
 </button>
 
-<button class="resetBtn" onclick="resetarSorteio()">
+<button class="resetBtn" id="btnResetar">
 ♻️ Resetar Sorteio
 </button>
 
@@ -546,17 +546,60 @@ getFirestore(appFirebase);
 const ref =
 doc(db,"app","dados");
 
-/* senha */
+/* estado */
 
 const SENHA="147580";
-
-/* estado */
 
 let admin=false;
 
 let jogadores=[];
 let times=[];
 let fila=[];
+
+/* login visitante */
+
+document
+.getElementById("btnVisitante")
+.addEventListener("click",()=>{
+
+document
+.getElementById("loginTela")
+.classList.add("hidden");
+
+});
+
+/* login admin */
+
+document
+.getElementById("btnAdmin")
+.addEventListener("click",()=>{
+
+let senha=
+document
+.getElementById("senhaAdmin")
+.value;
+
+if(senha===SENHA){
+
+admin=true;
+
+document
+.getElementById("loginTela")
+.classList.add("hidden");
+
+document
+.getElementById("adminArea")
+.classList.remove("hidden");
+
+render();
+
+}else{
+
+alert("Senha incorreta");
+
+}
+
+});
 
 /* realtime */
 
@@ -607,63 +650,35 @@ fila
 
 }
 
-/* login */
-
-window.entrarVisitante=function(){
+/* adicionar */
 
 document
-.getElementById("loginTela")
-.classList.add("hidden");
-
-};
-
-window.entrarAdmin=function(){
-
-let senha=
-document.getElementById("senhaAdmin").value;
-
-if(senha===SENHA){
-
-admin=true;
-
-document
-.getElementById("loginTela")
-.classList.add("hidden");
-
-document
-.getElementById("adminArea")
-.classList.remove("hidden");
-
-render();
-
-}else{
-
-alert("Senha incorreta");
-
-}
-
-};
-
-/* add */
-
-window.add=async function(){
+.getElementById("btnAdd")
+.addEventListener("click",async()=>{
 
 if(!admin)return;
 
 let nome=
-document.getElementById("nome").value.trim();
+document
+.getElementById("nome")
+.value.trim();
 
 let genero=
-document.getElementById("genero").value;
+document
+.getElementById("genero")
+.value;
 
 let nivel=
 parseInt(
-document.getElementById("nivel").value
+document
+.getElementById("nivel")
+.value
 );
 
-if(nome==="") return;
+if(nome==="")return;
 
-let existe=jogadores.some(j=>
+let existe=
+jogadores.some(j=>
 j.nome.toLowerCase()===
 nome.toLowerCase()
 );
@@ -683,19 +698,22 @@ nivel
 
 await salvar();
 
-document.getElementById("nome").value="";
+document
+.getElementById("nome")
+.value="";
 
-};
+});
 
 /* resetar */
 
-window.resetarSorteio=
-async function(){
+document
+.getElementById("btnResetar")
+.addEventListener("click",async()=>{
 
 if(!admin)return;
 
 let confirmar=confirm(
-"Resetar todos os sorteios?\n\nOs atletas continuarão cadastrados."
+"Resetar sorteio?\n\nOs atletas continuarão cadastrados."
 );
 
 if(!confirmar)return;
@@ -707,15 +725,13 @@ await salvar();
 
 render();
 
-alert("Sorteio resetado.");
-
-};
+});
 
 /* soma */
 
 function soma(lista){
 
-if(!Array.isArray(lista)) return 0;
+if(!Array.isArray(lista))return 0;
 
 return lista.reduce((a,j)=>{
 
@@ -791,10 +807,11 @@ fila.push(...mulheres);
 
 }
 
-/* animação */
+/* sortear */
 
-window.sortearAnimado=
-function(){
+document
+.getElementById("btnSortear")
+.addEventListener("click",()=>{
 
 if(!admin)return;
 
@@ -856,7 +873,7 @@ tela.classList.add(
 
 },3000);
 
-};
+});
 
 /* render */
 
@@ -895,7 +912,7 @@ ${admin
 
 });
 
-/* remover mobile */
+/* remover */
 
 document
 .querySelectorAll(".removeBtn")
@@ -1205,8 +1222,9 @@ console.error(e);
 
 /* exportar */
 
-window.exportarImagem=
-function(){
+document
+.getElementById("btnExportar")
+.addEventListener("click",()=>{
 
 html2canvas(
 document.getElementById(
@@ -1227,12 +1245,13 @@ link.click();
 
 });
 
-};
+});
 
 /* tv */
 
-window.abrirTV=
-function(){
+document
+.getElementById("btnTV")
+.addEventListener("click",()=>{
 
 document
 .getElementById("tv")
@@ -1240,7 +1259,7 @@ document
 "hidden"
 );
 
-};
+});
 
 /* qr */
 
