@@ -1,33 +1,3 @@
-function sortearTimes() {
-  let homens = jogadores.filter(j => j.genero === "M");
-  let mulheres = jogadores.filter(j => j.genero === "F");
-
-  if (homens.length < 2 || mulheres.length < 2) {
-    alert("Precisa de pelo menos 2 homens e 2 mulheres!");
-    return;
-  }
-
-  homens.sort((a, b) => b.nivel - a.nivel);
-  mulheres.sort((a, b) => b.nivel - a.nivel);
-
-  const totalTimes = Math.floor(Math.min(homens.length / 2, mulheres.length / 2));
-  let times = Array.from({ length: totalTimes }, () => []);
-
-  let i = 0;
-
-  // distribui homens
-  homens.forEach(j => {
-    times[i % totalTimes].push(j);
-    i++;
-  });
-
-  i = 0;
-
-  // distribui mulheres
-  mulheres.forEach(j => {
-    times[i % totalTimes].push(j);
-    i++;
-  });
-
-  mostrarTimes(times);
-}
+// A lógica oficial do sorteio foi centralizada em js/sorteio.js.
+// Este arquivo é mantido apenas para compatibilidade com versões antigas.
+// Regras: 2 homens + 2 mulheres, máximo 1 Avançado, alvo 9, máximo 10 e equilíbrio mínimo de 90%.
