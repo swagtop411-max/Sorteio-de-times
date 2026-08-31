@@ -59,7 +59,7 @@ canvas{max-height:300px}
 
 <section class="card"><div class="sectionTitle"><h2>👥 Atletas</h2><span class="badge" id="countBadge">0 cadastrados</span></div><ul id="lista"></ul></section>
 
-<section id="times"></section>
+<section class="card" style="padding:18px"><div class="sectionTitle"><h2>🏆 Times sorteados</h2><span class="badge">META 9 • MÁXIMO 10</span></div><div id="times"></div></section>
 
 <div class="twoCol">
 <section class="card"><div class="sectionTitle"><h2>📊 Estatísticas</h2></div><canvas id="grafico"></canvas><div id="estatisticas" class="stats"></div></section>
@@ -99,11 +99,11 @@ $("btnSortear").onclick=()=>{if(!admin)return;const tela=$("animacao"),nome=$("n
 
 function render(){
 $("countBadge").textContent=jogadores.length+" cadastrados";
-$("lista").innerHTML=jogadores.map(j=>'<li class="playerRow"><span class="playerInfo"><b>'+esc(j.nome)+'</b><br><small>'+ (j.genero==="M"?"Masculino":"Feminino") +' • N'+j.nivel+'</small></span>'+(admin?'<button class="removeBtn" data-nome="'+esc(j.nome)+'">Excluir</button>':'')+'</li>').join("")||'<li style="color:var(--muted)">Nenhum atleta cadastrado.</li>';
+$("lista").innerHTML=jogadores.map(j=>'<li class="playerRow"><span class="playerInfo"><b>'+esc(j.nome)+'</b><br><small>'+ (j.genero==="M"?"Masculino":"Feminino") +' • '+nomeNivel(j.nivel)+'</small></span>'+(admin?'<button class="removeBtn" data-nome="'+esc(j.nome)+'">Excluir</button>':'')+'</li>').join("")||'<li style="color:var(--muted)">Nenhum atleta cadastrado.</li>';
 document.querySelectorAll(".removeBtn").forEach(b=>b.onclick=async()=>{if(!confirm("Excluir atleta?"))return;const n=b.dataset.nome;jogadores=jogadores.filter(j=>j.nome!==n);times.forEach(t=>t.jogadores=t.jogadores.filter(j=>j.nome!==n));fila=fila.filter(j=>j.nome!==n);await salvar();render()});
 $("ranking").innerHTML=[...jogadores].sort((a,b)=>b.nivel-a.nivel).map((j,i)=>'<div class="rankItem"><span>#'+(i+1)+' '+esc(j.nome)+'</span><strong>N'+j.nivel+'</strong></div>').join("")||'<p style="color:var(--muted)">Cadastre atletas para formar o ranking.</p>';
-$("times").innerHTML=times.map(t=>'<article class="time"><h3>🏐 TIME '+t.numero+'</h3><p>⭐ Nível total: '+soma(t.jogadores)+'</p>'+t.jogadores.map(j=>'<div class="player">'+esc(j.nome)+' <small>(N'+j.nivel+')</small></div>').join("")+'</article>').join("");
-$("fila").innerHTML='<div class="sectionTitle"><h2>🚨 Fila</h2></div>'+(fila.length?fila.map(j=>'<p>'+esc(j.nome)+' • '+(j.genero==="M"?"M":"F")+' N'+j.nivel+'</p>').join(""):'<p>Nenhum atleta na fila.</p>');
+$("times").innerHTML=times.map(t=>'<article class="time"><h3>🏐 TIME '+t.numero+'</h3><p>⭐ Nível total: '+soma(t.jogadores)+' • ⚖️ '+(t.equilibrio||100)+'%</p>'+t.jogadores.map(j=>'<div class="player">'+esc(j.nome)+' <small>(N'+j.nivel+')</small></div>').join("")+'</article>').join("");
+$("fila").innerHTML='<div class="sectionTitle"><h2>🚨 Fila</h2></div>'+(fila.length?fila.map(j=>'<p>'+esc(j.nome)+' • '+(j.genero==="M"?"M":"F")+' '+nomeNivel(j.nivel)+'</p>').join(""):'<p>Nenhum atleta na fila.</p>');
 $("estatisticas").innerHTML='<div class="stat"><b>'+jogadores.length+'</b><span>ATLETAS</span></div><div class="stat"><b>'+times.length+'</b><span>TIMES</span></div><div class="stat"><b>'+fila.length+'</b><span>FILA</span></div>';
 $("tvConteudo").innerHTML=times.map(t=>'<div class="tvTime"><h2>TIME '+t.numero+'</h2><p>⭐ '+soma(t.jogadores)+' • '+t.jogadores.map(j=>esc(j.nome)).join(" • ")+'</p></div>').join("");
 grafico();gerarQR()
