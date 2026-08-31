@@ -52,8 +52,8 @@ canvas{max-height:300px}
 </header>
 
 <section id="adminArea" class="card hidden">
-<div class="sectionTitle"><h2>🎯 Controle do sorteio</h2><span class="badge">ADMINISTRADOR</span></div>
-<div class="adminGrid"><input id="nome" placeholder="Nome do atleta"><select id="genero"><option value="M">Masculino</option><option value="F">Feminino</option></select><select id="nivel"><option value="1">N1</option><option value="2">N2</option><option value="3">N3</option><option value="4">N4</option><option value="5">N5</option></select></div>
+<div class="sectionTitle"><h2>🎯 Controle do sorteio</h2><span class="badge">9 IDEAL • 10 MÁX • 1 AVANÇADO</span></div>
+<div class="adminGrid"><input id="nome" placeholder="Nome do atleta"><select id="genero"><option value="M">Masculino</option><option value="F">Feminino</option></select><select id="nivel"><option value="1">Iniciante</option><option value="2">Intermediário</option><option value="3">Avançado</option></select></div>
 <div class="actions"><button id="btnAdd" class="secondary">➕ Adicionar atleta</button><button id="btnSortear" class="sortBtn">🎲 Sortear times</button><button id="btnExportar" class="exportBtn">📸 Exportar</button><button id="btnTV" class="secondary">📺 Painel TV</button><button id="btnResetar" class="resetBtn">♻️ Resetar</button></div>
 </section>
 
@@ -74,6 +74,7 @@ canvas{max-height:300px}
 </main>
 
 <script type="module">
+import { sortearTimes, nomeNivel, normalizarNivel } from "./js/sorteio.js";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -94,7 +95,7 @@ $("btnResetar").onclick=async()=>{if(!admin)return;if(!confirm("Resetar o sortei
 
 function sortear(){times=[];fila=[];let h=jogadores.filter(j=>j.genero==="M").sort(()=>Math.random()-.5),m=jogadores.filter(j=>j.genero==="F").sort(()=>Math.random()-.5);const qtd=Math.floor(Math.min(h.length/2,m.length/2));for(let i=0;i<qtd;i++)times.push({numero:i+1,jogadores:[]});for(let i=0;i<qtd;i++){if(h.length)times[i].jogadores.push(h.shift());if(h.length)times[i].jogadores.push(h.shift());if(m.length)times[i].jogadores.push(m.shift());if(m.length)times[i].jogadores.push(m.shift())}fila.push(...h,...m)}
 
-$("btnSortear").onclick=()=>{if(!admin)return;const tela=$("animacao"),nome=$("nomeAnimado");tela.classList.remove("hidden");let i=0;const intervalo=setInterval(()=>{if(jogadores.length)nome.textContent=jogadores[i++%jogadores.length].nome},90);setTimeout(async()=>{clearInterval(intervalo);sortear();await salvar();render();tela.classList.add("hidden")},2200)};
+$("btnSortear").onclick=()=>{if(!admin)return;const tela=$("animacao"),nome=$("nomeAnimado");tela.classList.remove("hidden");let i=0;const intervalo=setInterval(()=>{if(jogadores.length)nome.textContent=jogadores[i++%jogadores.length].nome},70);setTimeout(async()=>{clearInterval(intervalo);const resultado=sortearTimes(jogadores);tela.classList.add("hidden");if(!resultado.ok){alert(resultado.erro);return;}times=resultado.times;fila=resultado.fila;await salvar();render()},2200)};
 
 function render(){
 $("countBadge").textContent=jogadores.length+" cadastrados";
