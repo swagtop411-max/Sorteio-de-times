@@ -36,22 +36,22 @@ function avancados(time) {
   return time.filter(j => normalizarNivel(j.nivel) === 3).length;
 }
 
-function valido(time) {
+function valido(time, aplicarRegraAvancado = true) {
   return time.length === 4 &&
     time.filter(j => j.genero === "M").length === 2 &&
     time.filter(j => j.genero === "F").length === 2 &&
     pontuacao(time) <= REGRAS_SORTEIO.maximo &&
-    avancados(time) <= REGRAS_SORTEIO.maxAvancados;
+    (!aplicarRegraAvancado || avancados(time) <= REGRAS_SORTEIO.maxAvancados);
 }
 
-function criarCandidatos(homens, mulheres) {
+function criarCandidatos(homens, mulheres, aplicarRegraAvancado = true) {
   const candidatos = [];
   for (let a = 0; a < homens.length; a++) {
     for (let b = a + 1; b < homens.length; b++) {
       for (let c = 0; c < mulheres.length; c++) {
         for (let d = c + 1; d < mulheres.length; d++) {
           const time = [homens[a], homens[b], mulheres[c], mulheres[d]];
-          if (valido(time) && (pontuacao(time) === 9 || pontuacao(time) === 10)) {
+          if (valido(time, aplicarRegraAvancado) && (pontuacao(time) === 9 || pontuacao(time) === 10)) {
             candidatos.push({ time, pontos: pontuacao(time) });
           }
         }
@@ -101,12 +101,17 @@ export function sortearTimes(atletas) {
   const homens = base.filter(j => j.genero === "M");
   const mulheres = base.filter(j => j.genero === "F");
   const qtd = Math.floor(Math.min(homens.length / 2, mulheres.length / 2));
+  const totalAvancados = base.filter(j => normalizarNivel(j.nivel) === 3).length;
+  const aplicarRegraAvancado = totalAvancados > 0;
 
   if (qtd < 1) {
     return { ok: false, erro: "É necessário ter pelo menos 2 homens e 2 mulheres.", times: [], fila: base, equilibrio: 0 };
   }
 
-  const candidatos = criarCandidatos(homens, mulheres);
+  const candidatos = criarCandidatos(homens, mulheres, aplicarRegraAvancado);
+  // A regra de 1 Avançado por time só é aplicada quando existe pelo menos
+  // um Avançado entre os atletas. Sem Avançados, o sorteio segue normalmente,
+  // mantendo as demais regras de composição, pontuação e equilíbrio.
   // Tenta várias ordens para encontrar a melhor combinação. 9 pontos é sempre prioridade.
   let melhor = null;
   for (let tentativa = 0; tentativa < 2500; tentativa++) {
@@ -124,7 +129,9 @@ export function sortearTimes(atletas) {
   if (!melhor) {
     return {
       ok: false,
-      erro: "Não foi possível montar times com as regras atuais. Tente ajustar os atletas disponíveis.",
+      erro: aplicarRegraAvancado
+        ? "Não foi possível montar times com as regras atuais. Verifique a quantidade de Avançados e a composição dos atletas disponíveis."
+        : "Não foi possível montar times com a composição atual de atletas. Tente novamente ou ajuste a quantidade de atletas.",
       times: [],
       fila: base,
       equilibrio: 0
