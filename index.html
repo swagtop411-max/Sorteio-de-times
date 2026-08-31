@@ -33,7 +33,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 .teamSection .sectionTitle{margin-bottom:12px}.roundStatus{display:flex;align-items:center;gap:13px;margin:0 0 16px;padding:13px 15px;border:1px solid #dcefe5;background:#f4fbf7;border-radius:15px}.roundIcon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#fff;border:1px solid #dcefe5;font-size:20px}.roundStatus strong{display:block;font-size:14px}.roundStatus span{display:block;margin-top:3px;color:#69778a;font-size:11px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.stat{padding:12px;border-radius:13px;background:#f7f9fb;border:1px solid #edf0f3}.stat b{display:block;font-size:22px;color:var(--blue)}.stat span{font-size:9px;color:var(--muted);font-weight:900;letter-spacing:.5px}
 #fila p{display:inline-block;margin:5px 5px 0 0;padding:8px 10px;border-radius:999px;background:#fff7e9;color:#8a5b19;border:1px solid #f5e0b8;font-size:11px;font-weight:800}
 #tv{background:#0e1620;color:#fff;border-color:#1f2d3d}.tvTime{padding:16px 0;border-bottom:1px solid #253343}.tvTime:last-child{border-bottom:0}.tvTime h2{font-size:25px}.tvTime p{color:#a9bacd;margin-top:5px}#qr{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:250px;margin-top:8px;padding:20px;border-radius:18px;background:#f8fafc;border:1px dashed #dce4ec}#qr canvas,#qr img{width:220px!important;height:220px!important;background:#fff;padding:8px;border-radius:10px;box-shadow:0 8px 22px rgba(20,48,80,.1)}.qrHint{margin-top:10px;color:#69778a;font-size:11px;font-weight:700;text-align:center}
-.footer{text-align:center;padding:34px 0 46px;color:var(--muted);font-size:11px}.footerLogo{display:block;width:180px;height:180px;object-fit:cover;margin:0 auto 16px;border-radius:22px;border:1px solid var(--line);box-shadow:0 14px 34px rgba(26,49,78,.14)}.footer strong{color:var(--ink)}
+.footer{text-align:center;padding:34px 0 46px;color:var(--muted);font-size:11px}.footerLogo{display:block;width:min(420px,92vw);height:auto;max-height:none;object-fit:contain;margin:0 auto 16px;border:0;border-radius:0;box-shadow:none;image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:hidden}.footer strong{color:var(--ink)}
 #loginTela,#animacao{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:rgba(12,22,35,.72);backdrop-filter:blur(12px)}.loginBox{width:min(430px,calc(100% - 28px));padding:32px;border-radius:25px;background:#fff;border:1px solid #e4e9ef;box-shadow:0 30px 80px rgba(0,0,0,.18);text-align:center}.loginLogo{width:74px;height:74px;border-radius:18px;object-fit:cover;margin-bottom:14px}.loginBox h2{font-size:25px;letter-spacing:-.8px}.loginBox p{color:var(--muted);font-size:13px;margin:7px 0 20px}.loginBox button{width:100%;margin:5px 0}.loginBox hr{border:0;border-top:1px solid var(--line);margin:18px 0}.drawText{text-align:center;font-size:clamp(28px,6vw,62px);font-weight:950;color:#fff}.drawText div{color:#fff;animation:pulse 1s infinite alternate}.drawText h2{margin-top:18px;color:#9dccff}@keyframes pulse{to{transform:scale(1.04);opacity:.72}}.hidden{display:none!important}canvas{max-height:280px}
 @media(max-width:800px){.container{padding:13px}.hero{padding:28px 23px}.quick{grid-template-columns:repeat(2,1fr)}.adminGrid,.twoCol{grid-template-columns:1fr}.list{grid-template-columns:1fr}.actions button{flex:1;min-width:135px}}
 @media(max-width:480px){.topbar .status{display:none}.quickCard{padding:13px}.quickCard b{font-size:20px}.card{padding:16px}.actions button{width:100%}.sectionTitle{align-items:flex-start;flex-direction:column}.badge{align-self:flex-start}}
@@ -41,7 +41,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 </head>
 <body>
 <div id="loginTela"><div class="loginBox">
-<img class="loginLogo" src="MeM.jpeg" alt="M&M Organização">
+<img class="loginLogo" src="MeM.jpg" alt="M&M Organização">
 <div class="eyebrow">M&M Organização apresenta</div><h2>M&M VÔLEI PRO</h2><p>Sorteio inteligente para montar partidas equilibradas.</p>
 <button id="btnVisitante" class="sortBtn">👤 Entrar como visitante</button><hr>
 <input type="password" id="senhaAdmin" placeholder="Senha do administrador">
@@ -51,7 +51,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 <div id="animacao" class="hidden"><div class="drawText"><div>🏐 SORTEANDO TIMES</div><h2 id="nomeAnimado"></h2></div></div>
 
 <main class="container">
-<div class="topbar"><div class="brandMini"><img src="MeM.jpeg" alt="M&M"><div>M&M <span>VÔLEI PRO</span></div></div><div class="status"><i class="dot"></i> Sistema online</div></div>
+<div class="topbar"><div class="brandMini"><img src="MeM.jpg" alt="M&M"><div>M&M <span>VÔLEI PRO</span></div></div><div class="status"><i class="dot"></i> Sistema online</div></div>
 
 <header class="hero">
 <div class="eyebrow">SORTEIO ESPORTIVO • EQUILÍBRIO EM QUADRA</div>
@@ -97,7 +97,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 <section id="tv" class="card hidden"><div class="sectionTitle"><div><h2>📺 Painel TV / OBS</h2><p>Visual limpo para exibição em tela.</p></div><span class="badge">AO VIVO</span></div><div id="tvConteudo"></div></section>
 <section class="card"><div class="sectionTitle"><div><h2>📱 Acesso rápido</h2><p>Abra o aplicativo em outro celular usando o QR Code.</p></div><span class="badge">QR CODE</span></div><div id="qr"></div></section>
 
-<footer class="footer"><img class="footerLogo" src="MeM.jpeg" alt="M&M Organização"><div><strong>M&M VÔLEI PRO</strong></div><div style="margin-top:5px">Aplicativo criado por <strong>M&M Organização</strong> • 2026</div></footer>
+<footer class="footer"><img class="footerLogo" src="MeM.jpg" alt="M&M Organização" loading="eager" decoding="sync"><div><strong>M&M VÔLEI PRO</strong></div><div style="margin-top:5px">Aplicativo criado por <strong>M&M Organização</strong> • 2026</div></footer>
 </main>
 
 <script type="module">
