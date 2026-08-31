@@ -76,8 +76,7 @@ function escolherMelhor(candidatos, usados, alvo) {
   return melhor;
 }
 
-function construir(homens, mulheres, qtd) {
-  const candidatos = criarCandidatos(homens, mulheres);
+function construir(homens, mulheres, qtd, candidatos) {
   if (!candidatos.length) return null;
 
   const usados = new Set();
@@ -107,12 +106,13 @@ export function sortearTimes(atletas) {
     return { ok: false, erro: "É necessário ter pelo menos 2 homens e 2 mulheres.", times: [], fila: base, equilibrio: 0 };
   }
 
+  const candidatos = criarCandidatos(homens, mulheres);
   // Tenta várias ordens para encontrar a melhor combinação. 9 pontos é sempre prioridade.
   let melhor = null;
   for (let tentativa = 0; tentativa < 2500; tentativa++) {
     const h = embaralhar(homens);
     const m = embaralhar(mulheres);
-    const r = construir(h, m, qtd);
+    const r = construir(h, m, qtd, candidatos);
     if (!r) continue;
     const score = r.pontos.reduce((s, p) => s + Math.abs(REGRAS_SORTEIO.alvo - p), 0);
     if (!melhor || score < melhor.score || (score === melhor.score && r.equilibrio > melhor.equilibrio)) {
