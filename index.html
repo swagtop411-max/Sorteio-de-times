@@ -7,7 +7,7 @@
 <title>M&M Vôlei Pro | Sorteio inteligente</title>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 :root{--ink:#152033;--muted:#69778a;--blue:#1267d6;--blue2:#2d8cff;--sky:#eaf4ff;--green:#15945a;--orange:#ef8b22;--red:#d94747;--line:#e3e8ef;--card:#fff;--bg:#f5f7fa}
@@ -132,7 +132,7 @@ function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",
 function grafico(){try{const c=$("grafico");if(window.graficoObj)window.graficoObj.destroy();window.graficoObj=new Chart(c,{type:"bar",data:{labels:times.map(t=>"Time "+t.numero),datasets:[{label:"Pontos",data:times.map(t=>soma(t.jogadores))}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:10,ticks:{stepSize:1}},x:{grid:{display:false}}}}})}catch(e){console.error(e)}}
 $("btnExportar").onclick=()=>{if(!times.length)return alert("Faça um sorteio antes de exportar.");html2canvas($("times"),{backgroundColor:"#fff",scale:2}).then(c=>{const a=document.createElement("a");a.download="times-mm-volei-pro.png";a.href=c.toDataURL();a.click()})};
 $("btnTV").onclick=()=>$("tv").classList.toggle("hidden");
-function gerarQR(){const q=$("qr");q.innerHTML='<div class="qrHint">Gerando QR Code...</div>';if(typeof QRCode==="undefined"){q.innerHTML='<div class="qrHint">QR Code indisponível no momento.<br>Recarregue a página para tentar novamente.</div>';return}try{q.innerHTML="";new QRCode(q,{text:location.href,width:180,height:180,colorDark:"#152033",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.H});const hint=document.createElement("div");hint.className="qrHint";hint.textContent="Aponte a câmera do celular para abrir o aplicativo";q.appendChild(hint)}catch(e){console.error(e);q.innerHTML='<div class="qrHint">Não foi possível gerar o QR Code.</div>'}}
+function gerarQR(){const q=$("qr");if(!q)return;const url=encodeURIComponent(location.href);q.innerHTML='<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=12&data='+url+'" alt="QR Code do M&M Vôlei Pro" width="180" height="180" loading="eager" referrerpolicy="no-referrer"><div class="qrHint">Aponte a câmera do celular para abrir o aplicativo</div>';const img=q.querySelector("img");img.onerror=()=>{q.innerHTML='<div class="qrHint">Não foi possível carregar o QR Code.<br><a href="'+location.href+'" target="_blank" rel="noopener" style="color:#1267d6;font-weight:900">Abrir o aplicativo pelo link</a></div>'}}
 </script>
 </body>
 </html>
