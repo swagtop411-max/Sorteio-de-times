@@ -1,0 +1,30 @@
+name: Validate sorter
+
+on:
+  pull_request:
+  push:
+    branches: ["main"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v7
+
+      - name: Setup Node
+        uses: actions/setup-node@v7
+        with:
+          node-version: 22
+
+      - name: Check JavaScript syntax
+        run: |
+          node --check js/sorteio.js
+          node --check tests/sorteio.test.mjs
+
+      - name: Run sorter tests
+        run: node --test tests/sorteio.test.mjs
