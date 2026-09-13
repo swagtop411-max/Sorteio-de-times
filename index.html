@@ -57,7 +57,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 <header class="hero">
 <div class="eyebrow">SORTEIO ESPORTIVO • EQUILÍBRIO EM QUADRA</div>
 <h1>M&M <span>VÔLEI PRO</span></h1>
-<p>Organize os atletas, monte equipes equilibradas e deixe a quadra pronta para o jogo. As equipes têm 2 homens e 2 mulheres e somam 9 ou 10 pontos, sem limite de atletas avançados. Quem não completar uma equipe vai para a fila de espera.</p>
+<p>Organize os atletas, monte equipes equilibradas e deixe a quadra pronta para o jogo. As equipes têm 2 homens e 2 mulheres, com até 10 pontos e sem limite de avançados. A meta é 9 pontos, mas equipes abaixo de 9 também são permitidas. O sorteio prioriza formar o máximo de times e busca o melhor equilíbrio possível.</p>
 <div class="creator">CRIADO POR M&M ORGANIZAÇÃO</div>
 </header>
 
@@ -69,7 +69,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 </div>
 
 <section id="adminArea" class="card hidden">
-<div class="sectionTitle"><div><h2>🎯 Montagem da rodada</h2><p>Cadastre atletas e gere uma nova composição.</p></div><span class="badge">2 HOMENS + 2 MULHERES • 9 OU 10 PONTOS</span></div>
+<div class="sectionTitle"><div><h2>🎯 Montagem da rodada</h2><p>Cadastre atletas e gere uma nova composição.</p></div><span class="badge">2H + 2M • META 9 • TETO 10</span></div>
 <div class="adminGrid">
 <div class="field"><label>Nome do atleta</label><input id="nome" placeholder="Digite o nome"></div>
 <div class="field"><label>Gênero</label><select id="genero"><option value="M">Masculino</option><option value="F">Feminino</option></select></div>
@@ -84,7 +84,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 </section>
 
 <section class="card">
-<div class="sectionTitle"><div><h2>🏆 Times da rodada</h2><p>Composição otimizada pelo algoritmo de equilíbrio.</p></div><span class="badge">9 OU 10 PONTOS</span></div>
+<div class="sectionTitle"><div><h2>🏆 Times da rodada</h2><p>Composição otimizada pelo algoritmo de equilíbrio.</p></div><span class="badge">ATÉ 10 PONTOS</span></div>
 <div id="roundStatus" class="roundStatus"><div class="roundIcon">⚖️</div><div><strong>Aguardando sorteio</strong><span>Gere uma rodada para analisar o equilíbrio das equipes.</span></div></div>
 <div id="times"><div class="empty">Nenhum sorteio realizado ainda.</div></div>
 </section>
@@ -102,7 +102,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 </main>
 
 <script type="module">
-import { sortearTimes, nomeNivel, normalizarNivel } from "./js/sorteio.js?v=5d1fd8e5ad43";
+import { sortearTimes, nomeNivel, normalizarNivel } from "./js/sorteio.js?v=20260913-meta9-teto10";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -151,8 +151,8 @@ $("heroAtletas").textContent=jogadores.length;$("heroTimes").textContent=times.l
 $("lista").innerHTML=listasPorGenero(jogadores,true);
 document.querySelectorAll(".removeBtn").forEach(b=>b.onclick=async()=>{if(!confirm("Excluir atleta?"))return;const n=b.dataset.nome;jogadores=jogadores.filter(j=>j.nome!==n);times.forEach(t=>t.jogadores=t.jogadores.filter(j=>j.nome!==n));fila=fila.filter(j=>j.nome!==n);await salvar();render()});
 $("ranking").innerHTML=jogadores.length?[...jogadores].sort((a,b)=>normalizarNivel(b.nivel)-normalizarNivel(a.nivel)).map((j,i)=>'<div class="rankItem"><span>#'+(i+1)+' '+esc(j.nome)+'</span><strong>'+nomeNivel(j.nivel)+'</strong></div>').join(""):'<div class="empty">Cadastre atletas para criar o ranking.</div>';
-if(times.length){const min=Math.min(...times.map(t=>Number(t.equilibrio)||100)),max=Math.max(...times.map(t=>soma(t.jogadores))),minP=Math.min(...times.map(t=>soma(t.jogadores)));const ok=min>=90&&max<=10;$("roundStatus").innerHTML='<div class="roundIcon">'+(ok?"🏆":"⚠️")+'</div><div><strong>'+(ok?"SORTEIO "+min+"% EQUILIBRADO":"SORTEIO PRECISA DE ATENÇÃO")+'</strong><span>Faixa de pontuação: '+minP+' a '+max+' pontos • '+times.length+' equipes formadas</span></div>'}else{$("roundStatus").innerHTML='<div class="roundIcon">⚖️</div><div><strong>'+(fila.length?"Atletas na fila de espera":"Aguardando sorteio")+'</strong><span>'+(fila.length?"Nenhuma equipe completa atende às regras atuais. Todos os inscritos estão na fila.":"Gere uma rodada para analisar o equilíbrio das equipes.")+'</span></div>'}
-$("times").innerHTML=times.length?times.map(t=>'<article class="time"><div class="timeHead"><h3>🏐 TIME '+t.numero+'</h3><div class="teamScore"><strong>'+soma(t.jogadores)+'</strong><small>PONTOS • '+(t.equilibrio||100)+'%</small></div></div>'+t.jogadores.map(j=>'<div class="player">'+esc(j.nome)+'<small>'+nomeNivel(j.nivel)+'</small></div>').join("")+'<div class="teamLevel"><i></i></div></article>').join(""):'<div class="empty">'+(fila.length?'Nenhuma equipe formada. Confira a fila de espera abaixo.':'Nenhum sorteio realizado ainda.')+'</div>';
+if(times.length){const min=Math.min(...times.map(t=>Number(t.equilibrio)||100)),max=Math.max(...times.map(t=>soma(t.jogadores))),minP=Math.min(...times.map(t=>soma(t.jogadores)));const ok=min>=90&&max<=10;$("roundStatus").innerHTML='<div class="roundIcon">'+(ok?"🏆":"⚠️")+'</div><div><strong>'+(ok?"SORTEIO "+min+"% EQUILIBRADO":"MELHOR EQUILÍBRIO DISPONÍVEL")+'</strong><span>Faixa de pontuação: '+minP+' a '+max+' pontos • '+times.length+' equipes formadas</span></div>'}else{$("roundStatus").innerHTML='<div class="roundIcon">⚖️</div><div><strong>'+(fila.length?"Atletas na fila de espera":"Aguardando sorteio")+'</strong><span>'+(fila.length?"Não há uma combinação de 2 homens e 2 mulheres com até 10 pontos. Confira os gêneros e níveis dos inscritos.":"Gere uma rodada para analisar o equilíbrio das equipes.")+'</span></div>'}
+$("times").innerHTML=times.length?times.map(t=>'<article class="time"><div class="timeHead"><h3>🏐 TIME '+t.numero+'</h3><div class="teamScore"><strong>'+soma(t.jogadores)+'</strong><small>PONTOS • '+(t.equilibrio??100)+'%</small></div></div>'+t.jogadores.map(j=>'<div class="player">'+esc(j.nome)+'<small>'+nomeNivel(j.nivel)+'</small></div>').join("")+'<div class="teamLevel"><i style="width:'+(Number(t.equilibrio)||0)+'%"></i></div></article>').join(""):'<div class="empty">'+(fila.length?'Nenhuma equipe formada. Confira a fila de espera abaixo.':'Nenhum sorteio realizado ainda.')+'</div>';
 $("fila").innerHTML='<div class="sectionTitle"><div><h2>🚨 Fila de espera</h2><p>Atletas que não entraram em uma equipe completa nesta rodada.</p></div><span class="badge">'+fila.length+' na fila</span></div><div class="genderLists">'+listasPorGenero(fila,false)+'</div>';
 $("estatisticas").innerHTML='<div class="stat"><b>'+jogadores.length+'</b><span>ATLETAS</span></div><div class="stat"><b>'+times.length+'</b><span>TIMES</span></div><div class="stat"><b>'+fila.length+'</b><span>FILA</span></div>';
 grafico();gerarQR();
