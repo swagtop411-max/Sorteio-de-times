@@ -22,7 +22,7 @@ body:before{content:"";position:fixed;inset:0;pointer-events:none;background:lin
 .eyebrow{color:var(--blue);font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px}.hero h1{font-size:clamp(34px,5vw,58px);line-height:1;letter-spacing:-2.5px}.hero h1 span{color:var(--blue)}.hero p{color:var(--muted);margin-top:12px;max-width:620px;font-size:15px}.creator{display:inline-flex;margin-top:22px;background:#fff;border:1px solid #dce7f4;color:#365a82;padding:9px 13px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.7px}
 .quick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.quickCard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;box-shadow:0 10px 28px rgba(26,49,78,.045)}.quickCard b{display:block;font-size:24px}.quickCard span{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.6px}.quickCard.accent b{color:var(--blue)}
 .card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:18px;box-shadow:0 10px 35px rgba(26,49,78,.055)}
-.sectionTitle{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.sectionTitle h2{font-size:19px;letter-spacing:-.4px}.sectionTitle p{color:var(--muted);font-size:12px;margin-top:3px}.badge{font-size:10px;color:#35648f;background:#eef6ff;border:1px solid #dcecff;padding:7px 10px;border-radius:999px;font-weight:900;white-space:nowrap}
+.sectionTitle{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.sectionTitle h2{font-size:19px;letter-spacing:-.4px}.sectionTitle p{color:var(--muted);font-size:12px;margin-top:3px}.badge{max-width:100%;font-size:10px;color:#35648f;background:#eef6ff;border:1px solid #dcecff;padding:7px 10px;border-radius:999px;font-weight:900;white-space:normal}
 .adminGrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.field{position:relative}.field label{display:block;font-size:10px;font-weight:900;text-transform:uppercase;color:var(--muted);margin:0 0 6px 3px;letter-spacing:.5px}
 input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius:12px;background:#fbfcfd;color:var(--ink);font-size:14px;outline:none;transition:.15s}input:focus,select:focus{border-color:#79b4fa;box-shadow:0 0 0 3px rgba(45,140,255,.1)}
 .actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}button{border:0;border-radius:12px;padding:12px 15px;color:#fff;font-weight:850;cursor:pointer;transition:.18s transform,.18s filter, .18s box-shadow;font-size:13px}button:hover{transform:translateY(-1px);filter:brightness(1.03)}.sortBtn{background:linear-gradient(135deg,var(--blue2),var(--blue));box-shadow:0 8px 18px rgba(18,103,214,.18)}.exportBtn{background:var(--green)}.resetBtn{background:var(--red)}.secondary{background:#26364a}.removeBtn{background:#fff;color:var(--red);border:1px solid #f1d3d3;padding:7px 9px;font-size:10px}
@@ -57,7 +57,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 <header class="hero">
 <div class="eyebrow">SORTEIO ESPORTIVO • EQUILÍBRIO EM QUADRA</div>
 <h1>M&M <span>VÔLEI PRO</span></h1>
-<p>Organize os atletas, monte equipes equilibradas e deixe a quadra pronta para o jogo. O sistema busca 9 pontos como meta, respeita o máximo de 10 e limita a um atleta Avançado por equipe.</p>
+<p>Organize os atletas, monte equipes equilibradas e deixe a quadra pronta para o jogo. As equipes têm 2 homens e 2 mulheres e somam 9 ou 10 pontos, sem limite de atletas avançados. Quem não completar uma equipe vai para a fila de espera.</p>
 <div class="creator">CRIADO POR M&M ORGANIZAÇÃO</div>
 </header>
 
@@ -69,7 +69,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 </div>
 
 <section id="adminArea" class="card hidden">
-<div class="sectionTitle"><div><h2>🎯 Montagem da rodada</h2><p>Cadastre atletas e gere uma nova composição.</p></div><span class="badge">META 9 • MÁXIMO 10 • 1 AVANÇADO</span></div>
+<div class="sectionTitle"><div><h2>🎯 Montagem da rodada</h2><p>Cadastre atletas e gere uma nova composição.</p></div><span class="badge">2 HOMENS + 2 MULHERES • 9 OU 10 PONTOS</span></div>
 <div class="adminGrid">
 <div class="field"><label>Nome do atleta</label><input id="nome" placeholder="Digite o nome"></div>
 <div class="field"><label>Gênero</label><select id="genero"><option value="M">Masculino</option><option value="F">Feminino</option></select></div>
@@ -84,7 +84,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 </section>
 
 <section class="card">
-<div class="sectionTitle"><div><h2>🏆 Times da rodada</h2><p>Composição otimizada pelo algoritmo de equilíbrio.</p></div><span class="badge">9 IDEAL • 10 LIMITE</span></div>
+<div class="sectionTitle"><div><h2>🏆 Times da rodada</h2><p>Composição otimizada pelo algoritmo de equilíbrio.</p></div><span class="badge">9 OU 10 PONTOS</span></div>
 <div id="roundStatus" class="roundStatus"><div class="roundIcon">⚖️</div><div><strong>Aguardando sorteio</strong><span>Gere uma rodada para analisar o equilíbrio das equipes.</span></div></div>
 <div id="times"><div class="empty">Nenhum sorteio realizado ainda.</div></div>
 </section>
