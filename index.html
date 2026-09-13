@@ -37,6 +37,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 #loginTela,#animacao{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:rgba(12,22,35,.72);backdrop-filter:blur(12px)}.loginBox{width:min(430px,calc(100% - 28px));padding:32px;border-radius:25px;background:#fff;border:1px solid #e4e9ef;box-shadow:0 30px 80px rgba(0,0,0,.18);text-align:center}.loginLogo{width:74px;height:74px;border-radius:18px;object-fit:cover;margin-bottom:14px}.loginBox h2{font-size:25px;letter-spacing:-.8px}.loginBox p{color:var(--muted);font-size:13px;margin:7px 0 20px}.loginBox button{width:100%;margin:5px 0}.loginBox hr{border:0;border-top:1px solid var(--line);margin:18px 0}.drawText{text-align:center;font-size:clamp(28px,6vw,62px);font-weight:950;color:#fff}.drawText div{color:#fff;animation:pulse 1s infinite alternate}.drawText h2{margin-top:18px;color:#9dccff}@keyframes pulse{to{transform:scale(1.04);opacity:.72}}.hidden{display:none!important}canvas{max-height:280px}
 @media(max-width:800px){.container{padding:13px}.hero{padding:28px 23px}.quick{grid-template-columns:repeat(2,1fr)}.adminGrid,.twoCol{grid-template-columns:1fr}.list{grid-template-columns:1fr}.actions button{flex:1;min-width:135px}}
 @media(max-width:480px){.topbar .status{display:none}.quickCard{padding:13px}.quickCard b{font-size:20px}.card{padding:16px}.actions button{width:100%}.sectionTitle{align-items:flex-start;flex-direction:column}.badge{align-self:flex-start}}
+.genderLists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.genderLists h3{font-size:15px;margin-bottom:12px}.genderLists .list{grid-template-columns:minmax(0,1fr)}.playerInfo{min-width:0;overflow-wrap:anywhere}.genderLists .playerRow{min-width:0}.genderCount{color:var(--muted);font-size:12px;margin-left:6px}@media(max-width:600px){.genderLists{grid-template-columns:minmax(0,1fr)}}
 </style>
 </head>
 <body>
@@ -79,7 +80,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 
 <section class="card">
 <div class="sectionTitle"><div><h2>👥 Atletas cadastrados</h2><p>Confira os níveis antes do sorteio.</p></div><span class="badge" id="countBadge">0 cadastrados</span></div>
-<ul id="lista" class="list"></ul>
+<div id="lista" class="genderLists"></div>
 </section>
 
 <section class="card">
@@ -116,19 +117,30 @@ async function salvar(){await setDoc(ref,{jogadores,times,fila})}
 function soma(list){return Array.isArray(list)?list.reduce((a,j)=>a+normalizarNivel(j.nivel),0):0}
 $("btnAdd").onclick=async()=>{if(!admin)return;const nome=$("nome").value.trim(),genero=$("genero").value,nivel=Number($("nivel").value);if(!nome)return alert("Digite o nome do atleta.");if(jogadores.some(j=>j.nome.toLowerCase()===nome.toLowerCase()))return alert("Jogador já cadastrado.");jogadores.push({nome,genero,nivel});await salvar();$("nome").value="";$("nome").focus()};
 $("btnResetar").onclick=async()=>{if(!admin)return;if(!confirm("Limpar os times e a fila? Os atletas continuarão cadastrados."))return;times=[];fila=[];await salvar();render()};
-$("btnSortear").onclick=()=>{if(!admin)return;if(jogadores.length<4)return alert("Cadastre pelo menos 2 homens e 2 mulheres.");const tela=$("animacao"),nome=$("nomeAnimado");tela.classList.remove("hidden");let i=0;const intervalo=setInterval(()=>{if(jogadores.length)nome.textContent=jogadores[i++%jogadores.length].nome},65);setTimeout(async()=>{clearInterval(intervalo);const resultado=sortearTimes(jogadores);tela.classList.add("hidden");if(!resultado.ok){alert(resultado.erro);return}times=resultado.times;fila=resultado.fila;await salvar();render()},1800)};
+$("btnSortear").onclick=()=>{if(!admin)return;const tela=$("animacao"),nome=$("nomeAnimado");tela.classList.remove("hidden");let i=0;const intervalo=setInterval(()=>{if(jogadores.length)nome.textContent=jogadores[i++%jogadores.length].nome},65);setTimeout(async()=>{clearInterval(intervalo);const resultado=sortearTimes(jogadores);tela.classList.add("hidden");if(!resultado.ok){alert(resultado.erro);return}times=resultado.times;fila=resultado.fila;await salvar();render()},1800)};
 function render(){
 $("countBadge").textContent=jogadores.length+" cadastrados";
 $("heroAtletas").textContent=jogadores.length;$("heroTimes").textContent=times.length;$("heroFila").textContent=fila.length;$("heroEquilibrio").textContent=times.length?(Math.min(...times.map(t=>t.equilibrio||100)).toFixed(0)+"%"):"--";
-$("lista").innerHTML=jogadores.length?jogadores.map(j=>'<li class="playerRow"><span class="playerInfo"><b>'+esc(j.nome)+'</b><br><small>'+(j.genero==="M"?"Masculino":"Feminino")+' • '+nomeNivel(j.nivel)+'</small></span>'+(admin?'<button class="removeBtn" data-nome="'+esc(j.nome)+'">Excluir</button>':'')+'</li>').join(""):'<li class="empty">Nenhum atleta cadastrado.</li>';
+$("lista").innerHTML=listasPorGenero(jogadores,true);
 document.querySelectorAll(".removeBtn").forEach(b=>b.onclick=async()=>{if(!confirm("Excluir atleta?"))return;const n=b.dataset.nome;jogadores=jogadores.filter(j=>j.nome!==n);times.forEach(t=>t.jogadores=t.jogadores.filter(j=>j.nome!==n));fila=fila.filter(j=>j.nome!==n);await salvar();render()});
 $("ranking").innerHTML=jogadores.length?[...jogadores].sort((a,b)=>normalizarNivel(b.nivel)-normalizarNivel(a.nivel)).map((j,i)=>'<div class="rankItem"><span>#'+(i+1)+' '+esc(j.nome)+'</span><strong>'+nomeNivel(j.nivel)+'</strong></div>').join(""):'<div class="empty">Cadastre atletas para criar o ranking.</div>';
-if(times.length){const min=Math.min(...times.map(t=>Number(t.equilibrio)||100)),max=Math.max(...times.map(t=>soma(t.jogadores))),minP=Math.min(...times.map(t=>soma(t.jogadores)));const ok=min>=90&&max<=10;$("roundStatus").innerHTML='<div class="roundIcon">'+(ok?"🏆":"⚠️")+'</div><div><strong>'+(ok?"SORTEIO "+min+"% EQUILIBRADO":"SORTEIO PRECISA DE ATENÇÃO")+'</strong><span>Faixa de pontuação: '+minP+' a '+max+' pontos • '+times.length+' equipes formadas</span></div>'}else{$("roundStatus").innerHTML='<div class="roundIcon">⚖️</div><div><strong>Aguardando sorteio</strong><span>Gere uma rodada para analisar o equilíbrio das equipes.</span></div>'}
-$("times").innerHTML=times.length?times.map(t=>'<article class="time"><div class="timeHead"><h3>🏐 TIME '+t.numero+'</h3><div class="teamScore"><strong>'+soma(t.jogadores)+'</strong><small>PONTOS • '+(t.equilibrio||100)+'%</small></div></div>'+t.jogadores.map(j=>'<div class="player">'+esc(j.nome)+'<small>'+nomeNivel(j.nivel)+'</small></div>').join("")+'<div class="teamLevel"><i></i></div></article>').join(""):'<div class="empty">Nenhum sorteio realizado ainda.</div>';
-$("fila").innerHTML='<div class="sectionTitle"><div><h2>🚨 Fila</h2><p>Atletas que não entraram em uma equipe completa nesta rodada.</p></div></div>'+(fila.length?fila.map(j=>'<p>'+esc(j.nome)+' • '+(j.genero==="M"?"M":"F")+' • '+nomeNivel(j.nivel)+'</p>').join(""):'<div class="empty">Nenhum atleta na fila.</div>');
+if(times.length){const min=Math.min(...times.map(t=>Number(t.equilibrio)||100)),max=Math.max(...times.map(t=>soma(t.jogadores))),minP=Math.min(...times.map(t=>soma(t.jogadores)));const ok=min>=90&&max<=10;$("roundStatus").innerHTML='<div class="roundIcon">'+(ok?"🏆":"⚠️")+'</div><div><strong>'+(ok?"SORTEIO "+min+"% EQUILIBRADO":"SORTEIO PRECISA DE ATENÇÃO")+'</strong><span>Faixa de pontuação: '+minP+' a '+max+' pontos • '+times.length+' equipes formadas</span></div>'}else{$("roundStatus").innerHTML='<div class="roundIcon">⚖️</div><div><strong>'+(fila.length?"Atletas na fila de espera":"Aguardando sorteio")+'</strong><span>'+(fila.length?"Nenhuma equipe completa atende às regras atuais. Todos os inscritos estão na fila.":"Gere uma rodada para analisar o equilíbrio das equipes.")+'</span></div>'}
+$("times").innerHTML=times.length?times.map(t=>'<article class="time"><div class="timeHead"><h3>🏐 TIME '+t.numero+'</h3><div class="teamScore"><strong>'+soma(t.jogadores)+'</strong><small>PONTOS • '+(t.equilibrio||100)+'%</small></div></div>'+t.jogadores.map(j=>'<div class="player">'+esc(j.nome)+'<small>'+nomeNivel(j.nivel)+'</small></div>').join("")+'<div class="teamLevel"><i></i></div></article>').join(""):'<div class="empty">'+(fila.length?'Nenhuma equipe formada. Confira a fila de espera abaixo.':'Nenhum sorteio realizado ainda.')+'</div>';
+$("fila").innerHTML='<div class="sectionTitle"><div><h2>🚨 Fila de espera</h2><p>Atletas que não entraram em uma equipe completa nesta rodada.</p></div><span class="badge">'+fila.length+' na fila</span></div><div class="genderLists">'+listasPorGenero(fila,false)+'</div>';
 $("estatisticas").innerHTML='<div class="stat"><b>'+jogadores.length+'</b><span>ATLETAS</span></div><div class="stat"><b>'+times.length+'</b><span>TIMES</span></div><div class="stat"><b>'+fila.length+'</b><span>FILA</span></div>';
 grafico();gerarQR();
 }
+
+function listasPorGenero(atletas, permitirExcluir) {
+  return [["M","Homens"],["F","Mulheres"]].map(([genero,titulo])=>{
+    const grupo=atletas.filter(j=>j.genero===genero);
+    return '<div><h3>'+titulo+' <span class="genderCount">('+grupo.length+')</span></h3><ul class="list">'+
+      (grupo.length?grupo.map(j=>'<li class="playerRow"><span class="playerInfo"><b>'+esc(j.nome)+'</b><br><small>'+nomeNivel(j.nivel)+'</small></span>'+
+        (permitirExcluir&&admin?'<button class="removeBtn" data-nome="'+esc(j.nome)+'">Excluir</button>':'')+'</li>').join(''):
+        '<li class="empty">Nenhum atleta nesta lista.</li>')+'</ul></div>';
+  }).join('');
+}
+
 function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
 function grafico(){try{const c=$("grafico");if(window.graficoObj)window.graficoObj.destroy();window.graficoObj=new Chart(c,{type:"bar",data:{labels:times.map(t=>"Time "+t.numero),datasets:[{label:"Pontos",data:times.map(t=>soma(t.jogadores))}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:10,ticks:{stepSize:1}},x:{grid:{display:false}}}}})}catch(e){console.error(e)}}
 $("btnExportar").onclick=()=>{if(!times.length)return alert("Faça um sorteio antes de exportar.");html2canvas($("times"),{backgroundColor:"#fff",scale:2}).then(c=>{const a=document.createElement("a");a.download="times-mm-volei-pro.png";a.href=c.toDataURL();a.click()})};
