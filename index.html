@@ -102,7 +102,7 @@ input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius
 </main>
 
 <script type="module">
-import { sortearTimes, nomeNivel, normalizarNivel } from "./js/sorteio.js";
+import { sortearTimes, nomeNivel, normalizarNivel } from "./js/sorteio.js?v=5d1fd8e5ad43";
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
@@ -117,7 +117,34 @@ async function salvar(){await setDoc(ref,{jogadores,times,fila})}
 function soma(list){return Array.isArray(list)?list.reduce((a,j)=>a+normalizarNivel(j.nivel),0):0}
 $("btnAdd").onclick=async()=>{if(!admin)return;const nome=$("nome").value.trim(),genero=$("genero").value,nivel=Number($("nivel").value);if(!nome)return alert("Digite o nome do atleta.");if(jogadores.some(j=>j.nome.toLowerCase()===nome.toLowerCase()))return alert("Jogador já cadastrado.");jogadores.push({nome,genero,nivel});await salvar();$("nome").value="";$("nome").focus()};
 $("btnResetar").onclick=async()=>{if(!admin)return;if(!confirm("Limpar os times e a fila? Os atletas continuarão cadastrados."))return;times=[];fila=[];await salvar();render()};
-$("btnSortear").onclick=()=>{if(!admin)return;const tela=$("animacao"),nome=$("nomeAnimado");tela.classList.remove("hidden");let i=0;const intervalo=setInterval(()=>{if(jogadores.length)nome.textContent=jogadores[i++%jogadores.length].nome},65);setTimeout(async()=>{clearInterval(intervalo);const resultado=sortearTimes(jogadores);tela.classList.add("hidden");if(!resultado.ok){alert(resultado.erro);return}times=resultado.times;fila=resultado.fila;await salvar();render()},1800)};
+$("btnSortear").onclick=async()=>{
+  if(!admin||$("btnSortear").disabled)return;
+  const botao=$("btnSortear"),tela=$("animacao"),nome=$("nomeAnimado");
+  botao.disabled=true;
+  nome.textContent="";
+  tela.classList.remove("hidden");
+  let i=0;
+  const intervalo=setInterval(()=>{if(jogadores.length)nome.textContent=jogadores[i++%jogadores.length].nome},65);
+  try{
+    await new Promise(resolve=>setTimeout(resolve,1800));
+    const resultado=sortearTimes(jogadores);
+    if(!resultado.ok)throw new Error(resultado.erro||"Falha no sorteio.");
+    // Só atualiza o resultado local depois de confirmar a gravação.
+    await setDoc(ref,{jogadores,times:resultado.times,fila:resultado.fila});
+    times=resultado.times;
+    fila=resultado.fila;
+    render();
+  }catch(e){
+    console.error("Falha ao concluir o sorteio",e);
+    tela.classList.add("hidden");
+    alert("Não foi possível concluir e salvar o sorteio. Verifique sua conexão e tente novamente.");
+  }finally{
+    clearInterval(intervalo);
+    tela.classList.add("hidden");
+    botao.disabled=false;
+  }
+};
+
 function render(){
 $("countBadge").textContent=jogadores.length+" cadastrados";
 $("heroAtletas").textContent=jogadores.length;$("heroTimes").textContent=times.length;$("heroFila").textContent=fila.length;$("heroEquilibrio").textContent=times.length?(Math.min(...times.map(t=>t.equilibrio||100)).toFixed(0)+"%"):"--";
