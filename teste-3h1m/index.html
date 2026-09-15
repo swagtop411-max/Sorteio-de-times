@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="theme-color" content="#f6f8fc">
+<title>TESTE 3H + 1M | M&M Vôlei Pro</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{--ink:#152033;--muted:#69778a;--blue:#1267d6;--blue2:#2d8cff;--sky:#eaf4ff;--green:#15945a;--orange:#ef8b22;--red:#d94747;--line:#e3e8ef;--card:#fff;--bg:#f5f7fa}
+body{font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--bg);min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background:linear-gradient(135deg,rgba(18,103,214,.035),transparent 35%),radial-gradient(circle at 90% 5%,rgba(45,140,255,.08),transparent 24%);z-index:0}
+.container{position:relative;z-index:1;max-width:1240px;margin:auto;padding:24px}
+.topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px}
+.brandMini{display:flex;align-items:center;gap:11px;font-weight:900;letter-spacing:-.4px}.brandMini img{width:40px;height:40px;object-fit:cover;border-radius:11px}.brandMini span{color:var(--blue)}
+.status{display:inline-flex;align-items:center;gap:7px;background:#fff;border:1px solid var(--line);padding:8px 12px;border-radius:999px;color:var(--muted);font-size:12px;font-weight:700}.dot{width:7px;height:7px;border-radius:50%;background:var(--green)}
+.hero{position:relative;overflow:hidden;background:linear-gradient(115deg,#fff 0%,#f8fbff 58%,#e9f3ff 100%);border:1px solid var(--line);border-radius:28px;padding:38px 42px;margin-bottom:18px;box-shadow:0 18px 50px rgba(26,49,78,.07)}
+.hero:after{content:"🏐";position:absolute;right:34px;bottom:-48px;font-size:190px;opacity:.055;transform:rotate(-16deg)}
+.eyebrow{color:var(--blue);font-size:11px;font-weight:900;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:9px}.hero h1{font-size:clamp(34px,5vw,58px);line-height:1;letter-spacing:-2.5px}.hero h1 span{color:var(--blue)}.hero p{color:var(--muted);margin-top:12px;max-width:620px;font-size:15px}.creator{display:inline-flex;margin-top:22px;background:#fff;border:1px solid #dce7f4;color:#365a82;padding:9px 13px;border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.7px}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px}.quickCard{background:#fff;border:1px solid var(--line);border-radius:18px;padding:16px 18px;box-shadow:0 10px 28px rgba(26,49,78,.045)}.quickCard b{display:block;font-size:24px}.quickCard span{font-size:11px;color:var(--muted);font-weight:800;text-transform:uppercase;letter-spacing:.6px}.quickCard.accent b{color:var(--blue)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:22px;margin-bottom:18px;box-shadow:0 10px 35px rgba(26,49,78,.055)}
+.sectionTitle{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:18px}.sectionTitle h2{font-size:19px;letter-spacing:-.4px}.sectionTitle p{color:var(--muted);font-size:12px;margin-top:3px}.badge{max-width:100%;font-size:10px;color:#35648f;background:#eef6ff;border:1px solid #dcecff;padding:7px 10px;border-radius:999px;font-weight:900;white-space:normal}
+.adminGrid{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px}.field{position:relative}.field label{display:block;font-size:10px;font-weight:900;text-transform:uppercase;color:var(--muted);margin:0 0 6px 3px;letter-spacing:.5px}
+input,select{width:100%;padding:13px 14px;border:1px solid #dce2e9;border-radius:12px;background:#fbfcfd;color:var(--ink);font-size:14px;outline:none;transition:.15s}input:focus,select:focus{border-color:#79b4fa;box-shadow:0 0 0 3px rgba(45,140,255,.1)}
+.actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}button{border:0;border-radius:12px;padding:12px 15px;color:#fff;font-weight:850;cursor:pointer;transition:.18s transform,.18s filter, .18s box-shadow;font-size:13px}button:hover{transform:translateY(-1px);filter:brightness(1.03)}.sortBtn{background:linear-gradient(135deg,var(--blue2),var(--blue));box-shadow:0 8px 18px rgba(18,103,214,.18)}.exportBtn{background:var(--green)}.resetBtn{background:var(--red)}.secondary{background:#26364a}.removeBtn{background:#fff;color:var(--red);border:1px solid #f1d3d3;padding:7px 9px;font-size:10px}
+#times{display:grid;grid-template-columns:repeat(auto-fit,minmax(285px,1fr));gap:16px}.time{position:relative;overflow:hidden;border:1px solid #dfe7f0;border-radius:22px;padding:20px;background:#fff;box-shadow:0 16px 38px rgba(20,48,80,.08);transition:.2s transform,.2s box-shadow}.time:hover{transform:translateY(-3px);box-shadow:0 20px 45px rgba(20,48,80,.13)}.time:before{content:"";position:absolute;inset:0 0 auto;height:5px;background:linear-gradient(90deg,#1267d6,#54a7ff)}.timeHead{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px;padding-bottom:13px;border-bottom:1px solid #edf1f5}.time h3{font-size:18px}.teamScore{text-align:right}.teamScore strong{display:block;font-size:28px;line-height:1;color:#1267d6}.teamScore small{color:#69778a;font-weight:900;font-size:9px}.player{display:flex;align-items:center;gap:10px;margin-top:8px;padding:11px 12px;border-radius:12px;background:#f6f9fc;border:1px solid #e7edf3;font-size:13px;font-weight:800}.player:before{content:"";width:8px;height:8px;border-radius:50%;background:#4d9cf4;flex:none}.player small{margin-left:auto;color:var(--muted);font-weight:700}.teamLevel{margin-top:15px;height:8px;border-radius:99px;background:#edf1f5;overflow:hidden}.teamLevel i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#36ad70,#15945a);border-radius:99px}
+.twoCol{display:grid;grid-template-columns:1.1fr .9fr;gap:18px}.rankItem{display:flex;align-items:center;justify-content:space-between;padding:11px 12px;border:1px solid #edf0f3;border-radius:12px;background:#fafbfd;margin:7px 0}.rankItem strong{color:var(--blue);font-size:12px}.rankItem span{font-size:13px;font-weight:700}
+.list{list-style:none;display:grid;grid-template-columns:repeat(2,1fr);gap:7px}.playerRow{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 12px;border:1px solid #edf0f3;border-radius:12px;background:#fafbfd}.playerInfo small{color:var(--muted);font-size:10px}.playerInfo b{font-size:13px}
+.empty{padding:25px;text-align:center;color:var(--muted);font-size:13px;border:1px dashed #dfe5eb;border-radius:14px}
+.teamSection .sectionTitle{margin-bottom:12px}.roundStatus{display:flex;align-items:center;gap:13px;margin:0 0 16px;padding:13px 15px;border:1px solid #dcefe5;background:#f4fbf7;border-radius:15px}.roundIcon{width:38px;height:38px;border-radius:12px;display:grid;place-items:center;background:#fff;border:1px solid #dcefe5;font-size:20px}.roundStatus strong{display:block;font-size:14px}.roundStatus span{display:block;margin-top:3px;color:#69778a;font-size:11px}.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:15px}.stat{padding:12px;border-radius:13px;background:#f7f9fb;border:1px solid #edf0f3}.stat b{display:block;font-size:22px;color:var(--blue)}.stat span{font-size:9px;color:var(--muted);font-weight:900;letter-spacing:.5px}
+#fila p{display:inline-block;margin:5px 5px 0 0;padding:8px 10px;border-radius:999px;background:#fff7e9;color:#8a5b19;border:1px solid #f5e0b8;font-size:11px;font-weight:800}
+#tv{background:#0e1620;color:#fff;border-color:#1f2d3d}.tvTime{padding:16px 0;border-bottom:1px solid #253343}.tvTime:last-child{border-bottom:0}.tvTime h2{font-size:25px}.tvTime p{color:#a9bacd;margin-top:5px}#qr{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:250px;margin-top:8px;padding:20px;border-radius:18px;background:#f8fafc;border:1px dashed #dce4ec}#qr canvas,#qr img{width:220px!important;height:220px!important;background:#fff;padding:8px;border-radius:10px;box-shadow:0 8px 22px rgba(20,48,80,.1)}.qrHint{margin-top:10px;color:#69778a;font-size:11px;font-weight:700;text-align:center}
+.footer{text-align:center;padding:34px 0 46px;color:var(--muted);font-size:11px}.footerLogo{display:block;width:min(420px,92vw);height:auto;max-height:none;object-fit:contain;margin:0 auto 16px;border:0;border-radius:0;box-shadow:none;image-rendering:auto;-webkit-backface-visibility:hidden;backface-visibility:hidden}.footer strong{color:var(--ink)}
+#loginTela,#animacao{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;z-index:9999;background:rgba(12,22,35,.72);backdrop-filter:blur(12px)}.loginBox{width:min(430px,calc(100% - 28px));padding:32px;border-radius:25px;background:#fff;border:1px solid #e4e9ef;box-shadow:0 30px 80px rgba(0,0,0,.18);text-align:center}.loginLogo{width:74px;height:74px;border-radius:18px;object-fit:cover;margin-bottom:14px}.loginBox h2{font-size:25px;letter-spacing:-.8px}.loginBox p{color:var(--muted);font-size:13px;margin:7px 0 20px}.loginBox button{width:100%;margin:5px 0}.loginBox hr{border:0;border-top:1px solid var(--line);margin:18px 0}.drawText{text-align:center;font-size:clamp(28px,6vw,62px);font-weight:950;color:#fff}.drawText div{color:#fff;animation:pulse 1s infinite alternate}.drawText h2{margin-top:18px;color:#9dccff}@keyframes pulse{to{transform:scale(1.04);opacity:.72}}.hidden{display:none!important}canvas{max-height:280px}
+@media(max-width:800px){.container{padding:13px}.hero{padding:28px 23px}.quick{grid-template-columns:repeat(2,1fr)}.adminGrid,.twoCol{grid-template-columns:1fr}.list{grid-template-columns:1fr}.actions button{flex:1;min-width:135px}}
+@media(max-width:480px){.topbar .status{display:none}.quickCard{padding:13px}.quickCard b{font-size:20px}.card{padding:16px}.actions button{width:100%}.sectionTitle{align-items:flex-start;flex-direction:column}.badge{align-self:flex-start}}
+.genderLists{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}.genderLists h3{font-size:15px;margin-bottom:12px}.genderLists .list{grid-template-columns:minmax(0,1fr)}.playerInfo{min-width:0;overflow-wrap:anywhere}.genderLists .playerRow{min-width:0}.genderCount{color:var(--muted);font-size:12px;margin-left:6px}@media(max-width:600px){.genderLists{grid-template-columns:minmax(0,1fr)}}
+.testNotice{border:2px solid #ef8b22;background:#fff9ee}.testNotice p{margin:10px 0;line-height:1.5}.testNotice a{color:#1267d6;font-weight:700}button:disabled{opacity:.55;cursor:wait;transform:none}dialog{margin:auto;width:min(650px,calc(100vw - 28px));max-height:90vh;overflow:auto;padding:24px;border:1px solid #e3e8ef;border-radius:20px;color:#152033}dialog::backdrop{background:rgba(12,22,35,.65)}dialog p{margin:12px 0;line-height:1.5}#exportPreview{width:100%;max-height:45vh;object-fit:contain;background:#f5f7fa;border-radius:12px}
+</style>
+</head>
+<body>
+<div id="animacao" class="hidden"><div class="drawText"><div>🏐 SORTEANDO TIMES</div><h2 id="nomeAnimado"></h2></div></div>
+
+<main class="container">
+<aside class="card testNotice"><strong>VERSÃO DE TESTE • 3 HOMENS + 1 MULHER</strong><p>As alterações e os sorteios desta página ficam somente neste navegador. O app principal continua com 2 homens + 2 mulheres.</p><a href="../">Voltar ao app principal</a><p id="testStatus" role="status" aria-live="polite">Carregando teste…</p></aside>
+<div class="topbar"><div class="brandMini"><img src="../MeM.jpg" alt="M&M"><div>M&M <span>VÔLEI PRO</span></div></div><div class="status"><i class="dot"></i> Teste neste navegador</div></div>
+
+<header class="hero">
+<div class="eyebrow">SORTEIO ESPORTIVO • EQUILÍBRIO EM QUADRA</div>
+<h1>M&M <span>VÔLEI PRO</span></h1>
+<p>Organize os atletas, monte equipes equilibradas e deixe a quadra pronta para o jogo. As equipes têm 3 homens e 1 mulher, com até 10 pontos e sem limite de avançados. A meta é 9 pontos, mas equipes abaixo de 9 também são permitidas. O sorteio prioriza formar o máximo de times e busca o melhor equilíbrio possível.</p>
+<div class="creator">CRIADO POR M&M ORGANIZAÇÃO</div>
+</header>
+
+<div class="quick">
+<div class="quickCard accent"><b id="heroAtletas">0</b><span>Atletas</span></div>
+<div class="quickCard"><b id="heroTimes">0</b><span>Times</span></div>
+<div class="quickCard"><b id="heroFila">0</b><span>Na fila</span></div>
+<div class="quickCard"><b id="heroEquilibrio">--</b><span>Equilíbrio</span></div>
+</div>
+
+<section id="adminArea" class="card">
+<div class="sectionTitle"><div><h2>🎯 Montagem da rodada</h2><p>Cadastre atletas e gere uma nova composição.</p></div><span class="badge">3H + 1M • META 9 • TETO 10</span></div>
+<div class="adminGrid">
+<div class="field"><label>Nome do atleta</label><input id="nome" placeholder="Digite o nome"></div>
+<div class="field"><label>Gênero</label><select id="genero"><option value="M">Masculino</option><option value="F">Feminino</option></select></div>
+<div class="field"><label>Nível</label><select id="nivel"><option value="1">Iniciante</option><option value="2">Intermediário</option><option value="3">Avançado</option></select></div>
+</div>
+<div class="actions"><button id="btnAdd" class="secondary">＋ Adicionar atleta</button><button id="btnImportar" class="secondary">Copiar atletas do app principal</button><button id="btnSortear" class="sortBtn">🎲 Sortear times</button><button id="btnExportar" class="exportBtn">▣ Exportar para WhatsApp</button><button id="btnTV" class="secondary">▣ Painel TV</button><button id="btnResetar" class="resetBtn">↻ Limpar rodada</button></div>
+</section>
+
+<section class="card">
+<div class="sectionTitle"><div><h2>👥 Atletas cadastrados</h2><p>Confira os níveis antes do sorteio.</p></div><span class="badge" id="countBadge">0 cadastrados</span></div>
+<div id="lista" class="genderLists"></div>
+</section>
+
+<section id="resultadoExportacao" class="card">
+<div class="sectionTitle"><div><h2>🏆 Times de teste • 3H + 1M</h2><p>Composição otimizada pelo algoritmo de equilíbrio.</p></div><span class="badge">ATÉ 10 PONTOS</span></div>
+<div id="roundStatus" class="roundStatus"><div class="roundIcon">⚖️</div><div><strong>Aguardando sorteio</strong><span>Gere uma rodada para analisar o equilíbrio das equipes.</span></div></div>
+<div id="times"><div class="empty">Nenhum sorteio realizado ainda.</div></div>
+</section>
+
+<div class="twoCol">
+<section class="card"><div class="sectionTitle"><div><h2>📊 Análise da rodada</h2><p>Comparativo da força das equipes.</p></div></div><canvas id="grafico"></canvas><div id="estatisticas" class="stats"></div></section>
+<section class="card"><div class="sectionTitle"><div><h2>🥇 Ranking de nível</h2><p>Classificação por pontuação individual.</p></div></div><div id="ranking"></div></section>
+</div>
+
+<section id="fila" class="card"><div class="sectionTitle"><div><h2>🚨 Fila</h2><p>Atletas que não entraram em uma equipe completa nesta rodada.</p></div></div><div class="empty">Nenhum atleta na fila.</div></section>
+<section id="tv" class="card hidden"><div class="sectionTitle"><div><h2>📺 Painel TV / OBS</h2><p>Visual limpo para exibição em tela.</p></div><span class="badge">AO VIVO</span></div><div id="tvConteudo"></div></section>
+<section class="card"><div class="sectionTitle"><div><h2>📱 Acesso rápido</h2><p>Este QR abre a página de teste. Os resultados salvos neste navegador não são transferidos.</p></div><span class="badge">QR CODE</span></div><div id="qr"></div></section>
+
+<footer class="footer"><img class="footerLogo" src="../MeM.jpg" alt="M&M Organização" loading="eager" decoding="sync"><div><strong>M&M VÔLEI PRO</strong></div><div style="margin-top:5px">Aplicativo criado por <strong>M&M Organização</strong> • 2026</div></footer>
+</main>
+
+<dialog id="exportDialog" aria-labelledby="exportTitle">
+<h2 id="exportTitle">Enviar imagem dos times</h2>
+<p id="exportHint">Escolha como enviar a imagem.</p>
+<img id="exportPreview" alt="Prévia dos times de teste">
+<div class="actions">
+<button id="btnCompartilhar" class="exportBtn">Compartilhar imagem</button>
+<button id="btnWhatsApp" class="sortBtn">Baixar e abrir meu WhatsApp</button>
+<button id="btnFecharExport" class="secondary">Fechar</button>
+</div>
+<p class="qrHint">Destino: (16) 98858-6327. Ao abrir a conversa, anexe a imagem baixada e confirme o envio.</p>
+</dialog>
+<script type="module">
+import { sortearTimes, nomeNivel, normalizarNivel } from "./sorteio.js?v=20260915-3h1m";
+import { configurarExportacao } from "./compartilhar.js?v=20260915-1";
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, getDoc } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+const firebaseConfig={apiKey:"AIzaSyDNBTUXydUU8gxdteO4_dwQn65WpLGoRV4",authDomain:"sorteio-de-times-aleatorios.firebaseapp.com",projectId:"sorteio-de-times-aleatorios",storageBucket:"sorteio-de-times-aleatorios.firebasestorage.app",messagingSenderId:"169025334598",appId:"1:169025334598:web:dcae7c136755b4f0d80947"};
+const db=getFirestore(initializeApp(firebaseConfig)),ref=doc(db,"app","dados");
+let admin=true,jogadores=[],times=[],fila=[];
+const $=id=>document.getElementById(id);
+const CHAVE_TESTE="mm-volei-teste-3h1m-v1";
+function guardar(dados){
+  localStorage.setItem(CHAVE_TESTE,JSON.stringify(dados));
+}
+async function salvar(){guardar({jogadores,times,fila});render()}
+function bloquear(valor){
+  document.querySelectorAll("#adminArea button,#adminArea input,#adminArea select").forEach(el=>el.disabled=valor);
+}
+async function importarAtletas(perguntar=true){
+  if(perguntar&&!confirm("Copiar os atletas atuais do app principal? Isso substitui apenas os dados deste teste."))return;
+  bloquear(true);
+  $("testStatus").textContent="Copiando atletas do app principal…";
+  let timer;
+  try{
+    const snapshot=await Promise.race([getDoc(ref),new Promise((_,reject)=>{timer=setTimeout(()=>reject(new Error("Tempo de conexão esgotado")),10000)})]);
+    const dados=snapshot.exists()?snapshot.data():{};
+    const copia=Array.isArray(dados.jogadores)?dados.jogadores:[];
+    guardar({jogadores:copia,times:[],fila:[]});
+    jogadores=copia;times=[];fila=[];
+    $("testStatus").textContent=copia.length+" atletas copiados. Seus testes ficam somente neste navegador.";
+    render();
+  }catch(e){
+    console.error(e);
+    $("testStatus").textContent="Não foi possível copiar os atletas. Tente o botão Copiar atletas novamente ou cadastre atletas para testar.";
+  }finally{clearTimeout(timer);bloquear(false)}
+}
+async function iniciarTeste(){
+  bloquear(true);
+  try{
+    const texto=localStorage.getItem(CHAVE_TESTE);
+    if(texto){
+      const dados=JSON.parse(texto);
+      if(!Array.isArray(dados.jogadores)||!Array.isArray(dados.times)||!Array.isArray(dados.fila))throw new Error("Teste salvo inválido");
+      jogadores=dados.jogadores;times=dados.times;fila=dados.fila;
+      $("testStatus").textContent="Teste recuperado deste navegador.";
+      render();bloquear(false);return;
+    }
+  }catch(e){
+    $("testStatus").textContent="Não foi possível recuperar o teste salvo. Você pode cadastrar atletas novamente.";
+    render();bloquear(false);return;
+  }
+  render();await importarAtletas(false);
+}
+$("btnImportar").onclick=()=>importarAtletas();
+function soma(list){return Array.isArray(list)?list.reduce((a,j)=>a+normalizarNivel(j.nivel),0):0}
+$("btnAdd").onclick=async()=>{if(!admin)return;const nome=$("nome").value.trim(),genero=$("genero").value,nivel=Number($("nivel").value);if(!nome)return alert("Digite o nome do atleta.");if(jogadores.some(j=>j.nome.toLowerCase()===nome.toLowerCase()))return alert("Jogador já cadastrado.");jogadores.push({nome,genero,nivel});await salvar();$("nome").value="";$("nome").focus()};
+$("btnResetar").onclick=async()=>{if(!admin)return;if(!confirm("Limpar os times e a fila? Os atletas continuarão cadastrados."))return;times=[];fila=[];await salvar();render()};
+$("btnSortear").onclick=async()=>{
+  if(!admin||$("btnSortear").disabled)return;
+  const botao=$("btnSortear"),tela=$("animacao"),nome=$("nomeAnimado");
+  botao.disabled=true;
+  nome.textContent="";
+  tela.classList.remove("hidden");
+  let i=0;
+  const intervalo=setInterval(()=>{if(jogadores.length)nome.textContent=jogadores[i++%jogadores.length].nome},65);
+  try{
+    await new Promise(resolve=>setTimeout(resolve,1800));
+    const resultado=sortearTimes(jogadores);
+    if(!resultado.ok)throw new Error(resultado.erro||"Falha no sorteio.");
+    // Só atualiza o resultado local depois de confirmar a gravação.
+    guardar({jogadores,times:resultado.times,fila:resultado.fila});
+    times=resultado.times;
+    fila=resultado.fila;
+    render();
+  }catch(e){
+    console.error("Falha ao concluir o sorteio",e);
+    tela.classList.add("hidden");
+    alert("Não foi possível concluir e salvar o sorteio. Verifique se o navegador permite salvar dados e tente novamente.");
+  }finally{
+    clearInterval(intervalo);
+    tela.classList.add("hidden");
+    botao.disabled=false;
+  }
+};
+
+function render(){
+$("countBadge").textContent=jogadores.length+" cadastrados";
+$("heroAtletas").textContent=jogadores.length;$("heroTimes").textContent=times.length;$("heroFila").textContent=fila.length;$("heroEquilibrio").textContent=times.length?(Math.min(...times.map(t=>t.equilibrio||100)).toFixed(0)+"%"):"--";
+$("lista").innerHTML=listasPorGenero(jogadores,true);
+document.querySelectorAll(".removeBtn").forEach(b=>b.onclick=async()=>{if(!confirm("Excluir atleta?"))return;const n=b.dataset.nome;jogadores=jogadores.filter(j=>j.nome!==n);times=[];fila=[];await salvar();render()});
+$("ranking").innerHTML=jogadores.length?[...jogadores].sort((a,b)=>normalizarNivel(b.nivel)-normalizarNivel(a.nivel)).map((j,i)=>'<div class="rankItem"><span>#'+(i+1)+' '+esc(j.nome)+'</span><strong>'+nomeNivel(j.nivel)+'</strong></div>').join(""):'<div class="empty">Cadastre atletas para criar o ranking.</div>';
+if(times.length){const min=Math.min(...times.map(t=>Number(t.equilibrio)||100)),max=Math.max(...times.map(t=>soma(t.jogadores))),minP=Math.min(...times.map(t=>soma(t.jogadores)));const ok=min>=90&&max<=10;$("roundStatus").innerHTML='<div class="roundIcon">'+(ok?"🏆":"⚠️")+'</div><div><strong>'+(ok?"SORTEIO "+min+"% EQUILIBRADO":"MELHOR EQUILÍBRIO DISPONÍVEL")+'</strong><span>Faixa de pontuação: '+minP+' a '+max+' pontos • '+times.length+' equipes formadas</span></div>'}else{$("roundStatus").innerHTML='<div class="roundIcon">⚖️</div><div><strong>'+(fila.length?"Atletas na fila de espera":"Aguardando sorteio")+'</strong><span>'+(fila.length?"Não há uma combinação de 3 homens e 1 mulher com até 10 pontos. Confira os gêneros e níveis dos inscritos.":"Gere uma rodada para analisar o equilíbrio das equipes.")+'</span></div>'}
+$("times").innerHTML=times.length?times.map(t=>'<article class="time"><div class="timeHead"><h3>🏐 TIME '+t.numero+'</h3><div class="teamScore"><strong>'+soma(t.jogadores)+'</strong><small>PONTOS • '+(t.equilibrio??100)+'%</small></div></div>'+t.jogadores.map(j=>'<div class="player">'+esc(j.nome)+'<small>'+nomeNivel(j.nivel)+'</small></div>').join("")+'<div class="teamLevel"><i style="width:'+(Number(t.equilibrio)||0)+'%"></i></div></article>').join(""):'<div class="empty">'+(fila.length?'Nenhuma equipe formada. Confira a fila de espera abaixo.':'Nenhum sorteio realizado ainda.')+'</div>';
+$("fila").innerHTML='<div class="sectionTitle"><div><h2>🚨 Fila de espera</h2><p>Atletas que não entraram em uma equipe completa nesta rodada.</p></div><span class="badge">'+fila.length+' na fila</span></div><div class="genderLists">'+listasPorGenero(fila,false)+'</div>';
+$("estatisticas").innerHTML='<div class="stat"><b>'+jogadores.length+'</b><span>ATLETAS</span></div><div class="stat"><b>'+times.length+'</b><span>TIMES</span></div><div class="stat"><b>'+fila.length+'</b><span>FILA</span></div>';
+grafico();gerarQR();
+}
+
+function listasPorGenero(atletas, permitirExcluir) {
+  return [["M","Homens"],["F","Mulheres"]].map(([genero,titulo])=>{
+    const grupo=atletas.filter(j=>j.genero===genero);
+    return '<div><h3>'+titulo+' <span class="genderCount">('+grupo.length+')</span></h3><ul class="list">'+
+      (grupo.length?grupo.map(j=>'<li class="playerRow"><span class="playerInfo"><b>'+esc(j.nome)+'</b><br><small>'+nomeNivel(j.nivel)+'</small></span>'+
+        (permitirExcluir&&admin?'<button class="removeBtn" data-nome="'+esc(j.nome)+'">Excluir</button>':'')+'</li>').join(''):
+        '<li class="empty">Nenhum atleta nesta lista.</li>')+'</ul></div>';
+  }).join('');
+}
+
+function esc(v){return String(v).replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[c]))}
+function grafico(){try{const c=$("grafico");if(window.graficoObj)window.graficoObj.destroy();window.graficoObj=new Chart(c,{type:"bar",data:{labels:times.map(t=>"Time "+t.numero),datasets:[{label:"Pontos",data:times.map(t=>soma(t.jogadores))}]},options:{responsive:true,plugins:{legend:{display:false}},scales:{y:{beginAtZero:true,max:10,ticks:{stepSize:1}},x:{grid:{display:false}}}}})}catch(e){console.error(e)}}
+configurarExportacao({
+  botao:$("btnExportar"),obterTimes:()=>times,
+  obterArea:()=>$("resultadoExportacao"),dialogo:$("exportDialog")
+});
+
+$("btnTV").onclick=()=>$("tv").classList.toggle("hidden");
+function gerarQR(){const q=$("qr");if(!q)return;const url=encodeURIComponent(location.href);q.innerHTML='<img src="https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=12&data='+url+'" alt="QR Code do M&M Vôlei Pro" width="220" height="220" loading="eager" referrerpolicy="no-referrer"><div class="qrHint">Aponte a câmera do celular para abrir o aplicativo</div>';const img=q.querySelector("img");img.onerror=()=>{q.innerHTML='<div class="qrHint">Não foi possível carregar o QR Code.<br><a href="'+location.href+'" target="_blank" rel="noopener" style="color:#1267d6;font-weight:900">Abrir o aplicativo pelo link</a></div>'}}
+iniciarTeste();
+</script>
+</body>
+</html>
